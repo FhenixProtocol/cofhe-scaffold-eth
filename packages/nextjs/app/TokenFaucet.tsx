@@ -1,10 +1,8 @@
 import { useState } from "react";
+import { CIPHER_TOKEN, MASK_TOKEN } from "./constants/Constants";
 import { tokenAbi } from "./constants/Token";
 import { formatUnits, parseUnits } from "viem";
 import { useAccount, useReadContract, useWriteContract } from "wagmi";
-
-const CIPHER_TOKEN = "0x2f4eD4942BdF443aE5da11ac3cAB7bee8d6FaF45"; //"0x09fc36Bb906cB720037232697624bcAc48a4a21F";
-const MASK_TOKEN = "0xbD313aDE73Cc114184CdBEf96788dd55118d4911"; //"0x988E23405b307E59c0B63c71191FEB8681C15097";
 
 const formatBalance = (balance: bigint | undefined): string => {
   if (!balance) return "0";

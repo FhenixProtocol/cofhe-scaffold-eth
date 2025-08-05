@@ -1,16 +1,16 @@
 import { TabConfig } from "../Tab";
 
-// Hook / Pool Addresses (Sepolia)
-export const MARKET_ORDER_HOOK = "0x31f5b2DbC1497fA726C0240417E6E2c6089EC080";
-export const CIPHER_TOKEN = "0x2f4eD4942BdF443aE5da11ac3cAB7bee8d6FaF45";
-export const MASK_TOKEN = "0xbD313aDE73Cc114184CdBEf96788dd55118d4911";
+// Hook / Pool Addresses (Arbitrum Sepolia)
+export const MARKET_ORDER_HOOK = "0xA98e541A012D4198b7122D72B38dD0149Ba94080";
+export const CIPHER_TOKEN = "0x3Ee7933017691D1AadCf97244D18c1130b148B88";
+export const MASK_TOKEN = "0x9828f7e6A63Aa269d7f4927bC803F6f8854218d1";
 
-export const POOL_ID = "0xb7518d0725ff168e16bb8884084f177fb5457fbde3c7c60f4f81bc53e957ca63";
+export const POOL_ID = "0xf27875cbaf127416b7d2f71ff178e377da7bdfb297354c770f81d2385f5452ed";
 
-// Uniswap Contracts (Sepolia)
-export const QUOTER = "0x61B3f2011A92d183C7dbaDBdA940a7555Ccf9227";
-export const POOL_SWAP = "0x9B6b46e2c869aa39918Db7f52f5557FE577B6eEe";
-export const STATE_VIEW = "0xE1Dd9c3fA50EDB962E442f60DfBc432e24537E4C";
+// Uniswap Contracts
+export const QUOTER = "0x7de51022d70a725b508085468052e25e22b5c4c9";
+export const POOL_SWAP = "0xf3a39c86dbd13c45365e57fb90fe413371f65af8";
+export const STATE_VIEW = "0x9d467fa9062b6e9b1a46e26007ad82db116c67cb";
 
 // Misc.
 export const MIN_SQRT_PRICE = 4295128739n + 1n;
