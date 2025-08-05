@@ -799,6 +799,46 @@ export const MarketOrderAbi = [
   },
   {
     type: "function",
+    name: "flushOrder",
+    inputs: [
+      {
+        name: "key",
+        type: "tuple",
+        internalType: "struct PoolKey",
+        components: [
+          {
+            name: "currency0",
+            type: "address",
+            internalType: "Currency",
+          },
+          {
+            name: "currency1",
+            type: "address",
+            internalType: "Currency",
+          },
+          {
+            name: "fee",
+            type: "uint24",
+            internalType: "uint24",
+          },
+          {
+            name: "tickSpacing",
+            type: "int24",
+            internalType: "int24",
+          },
+          {
+            name: "hooks",
+            type: "address",
+            internalType: "contract IHooks",
+          },
+        ],
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
     name: "getHookPermissions",
     inputs: [],
     outputs: [
@@ -1089,6 +1129,44 @@ export const MarketOrderAbi = [
     stateMutability: "view",
   },
   {
+    type: "function",
+    name: "unlockCallback",
+    inputs: [
+      {
+        name: "data",
+        type: "bytes",
+        internalType: "bytes",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bytes",
+        internalType: "bytes",
+      },
+    ],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "event",
+    name: "OrderFailed",
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "handle",
+        type: "uint256",
+        indexed: true,
+        internalType: "euint128",
+      },
+    ],
+    anonymous: false,
+  },
+  {
     type: "event",
     name: "OrderPlaced",
     inputs: [
@@ -1150,6 +1228,11 @@ export const MarketOrderAbi = [
   {
     type: "error",
     name: "NotPoolManager",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "ReentrancyGuardReentrantCall",
     inputs: [],
   },
   {
