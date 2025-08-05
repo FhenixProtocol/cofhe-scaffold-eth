@@ -1,11 +1,18 @@
 import { useMemo } from "react";
 import { HashLink } from "./HashLink";
 import { AsyncOrder } from "./hooks/useAsyncOrders";
+import { useFlushOrder } from "./hooks/useFlushOrder";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth";
 
 export function AsyncOrderStatus({ orders }: { orders: AsyncOrder[] }) {
   const { targetNetwork } = useTargetNetwork();
+  const { flushOrder, isFlushingOrder } = useFlushOrder();
+
+  const handleForceExecute = async (order: AsyncOrder) => {
+    await flushOrder(order.id);
+  };
+
   // Deduplicate orders based on ID
   const uniqueOrders = useMemo(() => {
     const seen = new Set<string>();
@@ -44,17 +51,33 @@ export function AsyncOrderStatus({ orders }: { orders: AsyncOrder[] }) {
                 <span>
                   {order.amount} {order.fromToken} → {order.toToken}
                 </span>
-                <span
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    order.status === "executing"
-                      ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
-                      : order.status === "completed"
-                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                        : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
-                  }`}
-                >
-                  {order.status === "executing" ? "queued" : order.status}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      order.status === "executing"
+                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
+                        : order.status === "completed"
+                          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                          : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+                    }`}
+                  >
+                    {order.status === "executing" ? "queued" : order.status}
+                  </span>
+                  {order.status === "executing" && (
+                    <button
+                      onClick={() => handleForceExecute(order)}
+                      disabled={isFlushingOrder === order.id}
+                      className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                        isFlushingOrder === order.id
+                          ? "bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-600 cursor-not-allowed"
+                          : "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50"
+                      }`}
+                      title="Manually trigger order execution"
+                    >
+                      {isFlushingOrder === order.id ? "Executing..." : "Force Execute"}
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="flex items-center gap-1">
                 <span className="text-gray-500 dark:text-gray-400">Tx:</span>

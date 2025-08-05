@@ -107,12 +107,33 @@ export function useBusinessLogic({
             sqrtPriceLimitX96: zeroForOne ? MIN_SQRT_PRICE : MAX_SQRT_PRICE,
           };
 
-          await writeContractAsync({
+          const txHash = await writeContractAsync({
+            address: POOL_SWAP as `0x${string}`,
             abi: PoolSwapAbi,
-            address: POOL_SWAP,
             functionName: "swap",
             args: [POOL_KEY, swapParams, TEST_SETTINGS, HOOK_DATA],
+            gas: 500000n, // Add reasonable gas limit
           });
+
+          console.log("Swap transaction submitted:", txHash);
+
+          const link = getBlockExplorerTxLink(targetNetwork.id, txHash);
+
+          // Show success notification with block explorer link
+          notification.success(
+            <div className={`flex flex-col cursor-default gap-1 text-primary`}>
+              <p className="my-0">Swap Completed! Your swap transaction has been confirmed on the blockchain</p>
+              <div className="flex flex-row gap-1">
+                {txHash && (
+                  <>
+                    <p className="text-sm text-muted-foreground font-reddit-mono">View Transaction:</p>
+                    <HashLink href={link} hash={txHash} />
+                  </>
+                )}
+              </div>
+            </div>,
+            { duration: 8000 },
+          );
 
           // Reset loading state after transaction is submitted
           setIsSwapLoading(false);
@@ -151,8 +172,8 @@ export function useBusinessLogic({
           });
 
           const hash = await writeContractAsync({
+            address: MARKET_ORDER_HOOK as `0x${string}`,
             abi: MarketOrderAbi,
-            address: MARKET_ORDER_HOOK,
             functionName: "placeMarketOrder",
             args: [POOL_KEY, zeroForOne, encryptedObject],
             gas: 1000000n, // Add explicit gas limit

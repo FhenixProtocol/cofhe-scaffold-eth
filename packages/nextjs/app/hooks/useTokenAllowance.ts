@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CIPHER_TOKEN, MARKET_ORDER_HOOK, MASK_TOKEN } from "../constants/Constants";
+import { CIPHER_TOKEN, MARKET_ORDER_HOOK, MASK_TOKEN, POOL_SWAP } from "../constants/Constants";
 import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 // Standard ERC20 ABI for allowance and approve functions
@@ -26,7 +26,11 @@ const ERC20_ABI = [
   },
 ] as const;
 
-export function useTokenAllowance(tokenSymbol: "CPH" | "MSK", formattedAmount: bigint) {
+export function useTokenAllowance(
+  tokenSymbol: "CPH" | "MSK",
+  formattedAmount: bigint,
+  spenderType: "market" | "swap" = "market",
+) {
   const { address } = useAccount();
   const [hasEnoughAllowance, setHasEnoughAllowance] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -34,6 +38,9 @@ export function useTokenAllowance(tokenSymbol: "CPH" | "MSK", formattedAmount: b
 
   // Get token contract address based on symbol
   const tokenAddress = tokenSymbol === "CPH" ? CIPHER_TOKEN : MASK_TOKEN;
+
+  // Get spender address based on type
+  const spenderAddress = spenderType === "market" ? MARKET_ORDER_HOOK : POOL_SWAP;
 
   // Contract write hook for approval
   const { writeContract, data: approveHash, error: approveError, isPending: approveIsPending } = useWriteContract();
@@ -52,7 +59,7 @@ export function useTokenAllowance(tokenSymbol: "CPH" | "MSK", formattedAmount: b
     address: tokenAddress as `0x${string}`,
     abi: ERC20_ABI,
     functionName: "allowance",
-    args: address ? [address, MARKET_ORDER_HOOK as `0x${string}`] : undefined,
+    args: address ? [address, spenderAddress as `0x${string}`] : undefined,
     query: {
       enabled: !!address && formattedAmount > 0n,
     },
@@ -115,7 +122,7 @@ export function useTokenAllowance(tokenSymbol: "CPH" | "MSK", formattedAmount: b
         address: tokenAddress as `0x${string}`,
         abi: ERC20_ABI,
         functionName: "approve",
-        args: [MARKET_ORDER_HOOK as `0x${string}`, approvalAmount],
+        args: [spenderAddress as `0x${string}`, approvalAmount],
       });
     } catch (error) {
       console.error("Failed to initiate approval:", error);

@@ -9,6 +9,7 @@ import { Token } from "./Token";
 import { TokenInput } from "./TokenInput";
 import { TransactionGuide } from "./TransactionGuide";
 import { DEFAULT_TOKENS, TABS } from "./constants/Constants";
+import { useAsyncOrderEvents } from "./hooks/useAsyncOrderEvents";
 import { useAsyncOrders } from "./hooks/useAsyncOrders";
 import { useBusinessLogic } from "./hooks/useBusinessLogic";
 import { useEncryptInput } from "./hooks/useEncryptInput";
@@ -58,7 +59,8 @@ export function SwapComponent() {
 
   const tokenAllowance = useTokenAllowance(
     fromToken.symbol as "CPH" | "MSK",
-    activeTab === "market" ? formattedAmount : 0n,
+    formattedAmount,
+    activeTab === "market" ? "market" : "swap",
   );
 
   // Auto-close approval modal when approval is successful
@@ -104,6 +106,12 @@ export function SwapComponent() {
     setDecryptionStep: marketOrderStatus.setDecryptionStep,
     setSettlementStep: marketOrderStatus.setSettlementStep,
     setManualDecryptionStatus: marketOrderStatus.setManualDecryptionStatus,
+    updateOrderStatus: asyncOrders.updateOrderStatus,
+  });
+
+  // Monitor async orders for settlement events
+  useAsyncOrderEvents({
+    asyncOrders: asyncOrders.asyncOrders,
     updateOrderStatus: asyncOrders.updateOrderStatus,
   });
 
@@ -275,10 +283,23 @@ export function SwapComponent() {
   // Determine button text and handler based on state
   const buttonConfig = useMemo(() => {
     if (activeTab !== "market") {
+      // Check allowance for swaps too
+      const hasInsufficientAllowance = !tokenAllowance.hasEnoughAllowance && formattedAmount > 0n;
+
       return {
-        text: isSwapLoading ? "Swapping..." : currentTabConfig?.buttonText || "Submit",
-        onClick: businessLogic.handleSubmit,
-        disabled: businessLogic.isSubmitDisabled || isSwapLoading,
+        text: hasInsufficientBalance
+          ? "Insufficient Balance"
+          : hasInsufficientAllowance
+            ? "Approve Tokens"
+            : isSwapLoading
+              ? "Swapping..."
+              : currentTabConfig?.buttonText || "Submit",
+        onClick: hasInsufficientBalance
+          ? () => {}
+          : hasInsufficientAllowance
+            ? () => setShowApprovalModal(true)
+            : businessLogic.handleSubmit,
+        disabled: businessLogic.isSubmitDisabled || isSwapLoading || hasInsufficientBalance,
         isLoading: isSwapLoading,
       };
     }
