@@ -107,6 +107,7 @@ export function SwapComponent() {
     setSettlementStep: marketOrderStatus.setSettlementStep,
     setManualDecryptionStatus: marketOrderStatus.setManualDecryptionStatus,
     updateOrderStatus: asyncOrders.updateOrderStatus,
+    updateOrderStatusByHandle: asyncOrders.updateOrderStatusByHandle,
   });
 
   // Monitor async orders for settlement events
@@ -133,9 +134,10 @@ export function SwapComponent() {
     setDecryptionStep: marketOrderStatus.setDecryptionStep,
     setSettlementStep: marketOrderStatus.setSettlementStep,
     setTransactionHash: marketOrderStatus.setTransactionHash,
-    resetTransactionStatus: marketOrderStatus.resetTransactionStatus,
     moveToAsyncTracking,
     setIsSwapLoading,
+    updateOrderStatus: asyncOrders.updateOrderStatus,
+    updateOrderStatusByHandle: asyncOrders.updateOrderStatusByHandle,
   });
 
   // Handlers

@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { TxGuideStepState } from "../TransactionGuide";
 import { MARKET_ORDER_HOOK } from "../constants/Constants";
 import { MarketOrderAbi } from "../constants/MarketOrder";
-import { decodeEventLog } from "viem";
-import { usePublicClient, useWaitForTransactionReceipt, useWatchContractEvent } from "wagmi";
+import { parseMarketOrderEvents } from "../utils/transactionReceiptParser";
+import { usePublicClient, useWaitForTransactionReceipt } from "wagmi";
 
 interface UseMarketOrderEventsProps {
   transactionHash: string;
@@ -17,6 +17,7 @@ interface UseMarketOrderEventsProps {
   setSettlementStep: (step: TxGuideStepState) => void;
   setManualDecryptionStatus: (status: boolean | undefined) => void;
   updateOrderStatus: (id: string, status: "completed" | "failed") => void;
+  updateOrderStatusByHandle: (handle: bigint, status: "completed" | "failed") => void;
 }
 
 export function useMarketOrderEvents({
@@ -31,9 +32,23 @@ export function useMarketOrderEvents({
   setSettlementStep,
   setManualDecryptionStatus,
   updateOrderStatus,
+  updateOrderStatusByHandle,
 }: UseMarketOrderEventsProps) {
   const publicClient = usePublicClient();
   const [orderPlacedDetected, setOrderPlacedDetected] = useState(false);
+
+  // Use refs to store callback functions to prevent dependency issues
+  const updateOrderStatusRef = useRef(updateOrderStatus);
+  const updateOrderStatusByHandleRef = useRef(updateOrderStatusByHandle);
+
+  // Update refs when callbacks change
+  useEffect(() => {
+    updateOrderStatusRef.current = updateOrderStatus;
+  }, [updateOrderStatus]);
+
+  useEffect(() => {
+    updateOrderStatusByHandleRef.current = updateOrderStatusByHandle;
+  }, [updateOrderStatusByHandle]);
 
   // Reset orderPlacedDetected when a new transaction starts
   useEffect(() => {
@@ -67,47 +82,6 @@ export function useMarketOrderEvents({
     query: {
       enabled: !!transactionHash,
     },
-  });
-
-  // Watch for OrderPlaced event
-  useWatchContractEvent({
-    address: MARKET_ORDER_HOOK,
-    abi: MarketOrderAbi,
-    eventName: "OrderPlaced",
-    onLogs: logs => {
-      logs.forEach(log => {
-        if (log.transactionHash === transactionHash && log.args?.user === address) {
-          console.log("OrderPlaced event detected via watcher:", log);
-          handleOrderPlacedEvent(log.args);
-        }
-      });
-    },
-    enabled: !!isProcessingOrder && !!address && !!encryptedValue,
-  });
-
-  // Watch for OrderSettled event
-  useWatchContractEvent({
-    address: MARKET_ORDER_HOOK,
-    abi: MarketOrderAbi,
-    eventName: "OrderSettled",
-    onLogs: logs => {
-      logs.forEach(log => {
-        console.log("order settled: ", log);
-        if (log.args?.user === address && encryptedValue && log.args?.handle === encryptedValue) {
-          console.log("OrderSettled event detected for our specific order");
-          setSettlementStep(TxGuideStepState.Success);
-
-          // Update the async order status to completed
-          if (transactionHash) {
-            console.log("Updating async order status to completed for:", transactionHash);
-            updateOrderStatus(transactionHash, "completed");
-          }
-
-          // Transaction status will remain visible until manually reset
-        }
-      });
-    },
-    enabled: !!transactionHash && !!address && !!encryptedValue,
   });
 
   // Manual decryption polling
@@ -157,40 +131,71 @@ export function useMarketOrderEvents({
     };
   }, [confirmationStep, isProcessingOrder, publicClient, encryptedValue, setManualDecryptionStatus]);
 
-  // Handle transaction receipt - parse for OrderPlaced events as fallback
+  // Handle transaction receipt - parse for all market order events
   useEffect(() => {
-    if (receipt && receipt.logs && isProcessingOrder && !orderPlacedDetected) {
-      console.log("Parsing transaction receipt for OrderPlaced events...");
+    if (receipt && receipt.logs && isProcessingOrder && address) {
+      console.log(`📝 MARKET ORDER MONITOR: Parsing transaction ${transactionHash} receipt for market order events...`);
 
       try {
-        const orderPlacedEvents = receipt.logs.filter(log => {
-          try {
-            const decoded = decodeEventLog({
-              abi: MarketOrderAbi,
-              data: log.data,
-              topics: log.topics,
-            });
-            return decoded.eventName === "OrderPlaced" && decoded.args?.user === address;
-          } catch {
-            return false;
+        const parsedEvents = parseMarketOrderEvents(receipt, address);
+
+        // Handle OrderPlaced events
+        if (parsedEvents.orderPlaced.length > 0 && !orderPlacedDetected) {
+          const orderPlacedEvent = parsedEvents.orderPlaced[0];
+          console.log("Found OrderPlaced event in transaction receipt:", orderPlacedEvent);
+          handleOrderPlacedEvent({ handle: orderPlacedEvent.handle, user: orderPlacedEvent.user });
+        }
+
+        // Handle OrderSettled events
+        parsedEvents.orderSettled.forEach(event => {
+          console.log("🎯 Found OrderSettled event in market order transaction:", event);
+          console.log("🎯 Current encryptedValue:", encryptedValue);
+          console.log("🎯 Event handle:", event.handle);
+          console.log("🎯 Handles match:", encryptedValue && event.handle === encryptedValue);
+
+          if (encryptedValue && event.handle === encryptedValue) {
+            console.log("✅ OrderSettled event matches our current order!");
+            setSettlementStep(TxGuideStepState.Success);
+
+            // Update the async order status to completed
+            if (transactionHash) {
+              console.log("Updating async order status to completed for:", transactionHash);
+              updateOrderStatusRef.current(transactionHash, "completed");
+            }
+          } else {
+            // This OrderSettled event is for a different order - update by handle
+            console.log("🔄 OrderSettled event is for a different order, updating by handle");
+            updateOrderStatusByHandleRef.current(event.handle, "completed");
           }
         });
 
-        if (orderPlacedEvents.length > 0) {
-          const eventLog = orderPlacedEvents[0];
-          const decoded = decodeEventLog({
-            abi: MarketOrderAbi,
-            data: eventLog.data,
-            topics: eventLog.topics,
-          });
-          console.log("Found OrderPlaced event in transaction receipt:", decoded);
-          handleOrderPlacedEvent(decoded.args);
-        }
+        // Handle OrderFailed events
+        parsedEvents.orderFailed.forEach(event => {
+          if (encryptedValue && event.handle === encryptedValue) {
+            console.log("Found OrderFailed event for our order:", event);
+            setSettlementStep(TxGuideStepState.Error);
+
+            // Update the async order status to failed
+            if (transactionHash) {
+              console.log("Updating async order status to failed for:", transactionHash);
+              updateOrderStatusRef.current(transactionHash, "failed");
+            }
+          }
+        });
       } catch (error) {
-        console.error("Error parsing transaction receipt for OrderPlaced events:", error);
+        console.error("Error parsing transaction receipt for market order events:", error);
       }
     }
-  }, [receipt, isProcessingOrder, address, orderPlacedDetected, handleOrderPlacedEvent]);
+  }, [
+    receipt,
+    isProcessingOrder,
+    address,
+    orderPlacedDetected,
+    handleOrderPlacedEvent,
+    encryptedValue,
+    transactionHash,
+    setSettlementStep,
+  ]);
 
   return {
     receipt,

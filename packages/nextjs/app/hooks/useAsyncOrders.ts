@@ -32,10 +32,23 @@ export function useAsyncOrders() {
     setAsyncOrders(prev => prev.map(order => (order.id === id ? { ...order, status } : order)));
   };
 
+  const updateOrderStatusByHandle = (handle: bigint, status: "completed" | "failed") => {
+    setAsyncOrders(prev => {
+      // Check if any order needs to be updated to avoid unnecessary renders
+      const hasOrderToUpdate = prev.some(order => order.encryptedValue === handle && order.status !== status);
+      if (!hasOrderToUpdate) {
+        return prev; // No changes needed
+      }
+
+      return prev.map(order => (order.encryptedValue === handle ? { ...order, status } : order));
+    });
+  };
+
   return {
     asyncOrders,
     addAsyncOrder,
     updateOrderStatus,
+    updateOrderStatusByHandle,
     hasOrder,
   };
 }

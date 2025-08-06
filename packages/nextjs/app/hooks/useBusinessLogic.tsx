@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { HashLink } from "../HashLink";
 import { TabType } from "../Tab";
 import { Token } from "../Token";
@@ -7,9 +7,10 @@ import { MARKET_ORDER_HOOK, MAX_SQRT_PRICE, MIN_SQRT_PRICE, POOL_SWAP } from "..
 import { HOOK_DATA, POOL_KEY, TEST_SETTINGS } from "../constants/Constants";
 import { MarketOrderAbi } from "../constants/MarketOrder";
 import { PoolSwapAbi } from "../constants/PoolSwap";
+import { useSwapTransactionMonitor } from "./useSwapTransactionMonitor";
 import { CoFheInItem } from "cofhejs/web";
 import { parseUnits } from "viem";
-import { useWriteContract } from "wagmi";
+import { useAccount, useWriteContract } from "wagmi";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { getBlockExplorerTxLink, notification } from "~~/utils/scaffold-eth";
 
@@ -31,9 +32,10 @@ interface UseBusinessLogicProps {
   setDecryptionStep: (step: TxGuideStepState) => void;
   setSettlementStep: (step: TxGuideStepState) => void;
   setTransactionHash: (hash: string) => void;
-  resetTransactionStatus: () => void;
   moveToAsyncTracking: () => void;
   setIsSwapLoading: (loading: boolean) => void;
+  updateOrderStatus: (id: string, status: "completed" | "failed") => void;
+  updateOrderStatusByHandle: (handle: bigint, status: "completed" | "failed") => void;
 }
 
 export function useBusinessLogic({
@@ -54,12 +56,47 @@ export function useBusinessLogic({
   setDecryptionStep,
   setSettlementStep,
   setTransactionHash,
-  resetTransactionStatus,
   moveToAsyncTracking,
   setIsSwapLoading,
+  updateOrderStatusByHandle,
 }: UseBusinessLogicProps) {
   const { writeContractAsync } = useWriteContract();
   const { targetNetwork } = useTargetNetwork();
+  const { address } = useAccount();
+
+  // Track swap transaction hash for monitoring
+  const [swapTransactionHash, setSwapTransactionHash] = useState<string | null>(null);
+
+  // Memoize callback functions to prevent infinite re-renders
+  const handleOrderSettled = useCallback(
+    (handle: bigint, txHash: string) => {
+      console.log(`🔥 SWAP CALLBACK: Swap transaction ${txHash} settled order with handle ${handle}`);
+      // Update order status by handle instead of transaction hash
+      updateOrderStatusByHandle(handle, "completed");
+      // Show notification
+      notification.success(`Your queued market order was filled by a swap transaction!`, { duration: 5000 });
+    },
+    [updateOrderStatusByHandle],
+  );
+
+  const handleOrderFailed = useCallback(
+    (handle: bigint, txHash: string) => {
+      console.log(`Swap transaction ${txHash} failed order with handle ${handle}`);
+      // Update order status by handle instead of transaction hash
+      updateOrderStatusByHandle(handle, "failed");
+      // Show notification
+      notification.error(`A queued market order failed during swap execution`, { duration: 5000 });
+    },
+    [updateOrderStatusByHandle],
+  );
+
+  // Monitor swap transactions for order settlement events
+  useSwapTransactionMonitor({
+    transactionHash: swapTransactionHash,
+    userAddress: address,
+    onOrderSettled: handleOrderSettled,
+    onOrderFailed: handleOrderFailed,
+  });
 
   // Handle decryption status updates
   useEffect(() => {
@@ -83,7 +120,14 @@ export function useBusinessLogic({
         }
       }
     }
-  }, [manualDecryptionStatus, isProcessingOrder, decryptionStep, setDecryptionStep, setSettlementStep]);
+  }, [
+    manualDecryptionStatus,
+    isProcessingOrder,
+    decryptionStep,
+    setDecryptionStep,
+    setSettlementStep,
+    moveToAsyncTracking,
+  ]);
 
   // Remove encryption step handling since we pre-encrypt
 
@@ -117,6 +161,10 @@ export function useBusinessLogic({
 
           console.log("Swap transaction submitted:", txHash);
 
+          // Set swap transaction hash for monitoring
+          console.log(`🔍 SETTING SWAP HASH FOR MONITORING: ${txHash}`);
+          setSwapTransactionHash(txHash);
+
           const link = getBlockExplorerTxLink(targetNetwork.id, txHash);
 
           // Show success notification with block explorer link
@@ -137,9 +185,16 @@ export function useBusinessLogic({
 
           // Reset loading state after transaction is submitted
           setIsSwapLoading(false);
+
+          // Clear swap transaction hash after showing notification
+          setTimeout(() => {
+            setSwapTransactionHash(null);
+          }, 1000);
         } catch (error) {
           console.error("Swap transaction failed:", error);
           setIsSwapLoading(false);
+          // Clear swap transaction hash on error
+          setSwapTransactionHash(null);
         }
       };
       swapTokens();
@@ -216,8 +271,8 @@ export function useBusinessLogic({
     setIsProcessingOrder,
     setConfirmationStep,
     setTransactionHash,
-    resetTransactionStatus,
     setIsSwapLoading,
+    targetNetwork.id,
   ]);
 
   const isSubmitDisabled = useMemo(() => {
