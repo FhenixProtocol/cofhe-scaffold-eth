@@ -39,18 +39,18 @@ export const wagmiConfig = createConfig({
 
     return createClient({
       chain: chain,
-        // chain.id === hardhat.id
-        //   ? // Add multicall3 contract address to hardhat chain
-        //     {
-        //       ...chain,
-        //       contracts: {
-        //         ...chain.contracts,
-        //         multicall3: {
-        //           address: HARDHAT_MULTICALL3_ADDRESS,
-        //         },
-        //       },
-        //     }
-        //   : chain,
+      // chain.id === hardhat.id
+      //   ? // Add multicall3 contract address to hardhat chain
+      //     {
+      //       ...chain,
+      //       contracts: {
+      //         ...chain.contracts,
+      //         multicall3: {
+      //           address: HARDHAT_MULTICALL3_ADDRESS,
+      //         },
+      //       },
+      //     }
+      //   : chain,
       transport: fallback(rpcFallbacks),
       ...(chain.id !== (hardhat as Chain).id
         ? {

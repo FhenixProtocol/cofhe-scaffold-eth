@@ -5,10 +5,12 @@ import { ConnectWallet } from "./ConnectWallet";
 import { Slot0Display } from "./PoolStateViewComponent";
 import { SwapComponent } from "./SwapComponent";
 import { TokenFaucet } from "./TokenFaucet";
+import { WalkthroughComponent } from "./walkthrough/WalkthroughComponent";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
+import { notification } from "~~/utils/scaffold-eth";
 
-type MainTabType = "swap" | "pool" | "faucet";
+type MainTabType = "swap" | "pool" | "faucet" | "walkthrough";
 
 interface MainTab {
   id: MainTabType;
@@ -19,6 +21,7 @@ const MAIN_TABS: MainTab[] = [
   { id: "swap", label: "Swap" },
   { id: "faucet", label: "Token Faucet" },
   { id: "pool", label: "Pool" },
+  { id: "walkthrough", label: "Walkthrough" },
 ];
 
 const Home: NextPage = () => {
@@ -26,7 +29,29 @@ const Home: NextPage = () => {
   const { address } = useAccount();
 
   const renderTabContent = () => {
-    // Show connect wallet message if no wallet is connected
+    // Allow walkthrough even without wallet connection (first step will guide wallet connection)
+    if (activeTab === "walkthrough") {
+      return (
+        <WalkthroughComponent
+          onFinish={() => {
+            // Show celebration notification
+            notification.success(
+              <div className="flex flex-col gap-1">
+                <p className="font-medium">🎉 Walkthrough Complete!</p>
+                <p className="text-sm text-gray-600">
+                  You&apos;re now ready to start private FHE trading. Welcome to the future of DeFi!
+                </p>
+              </div>,
+              { duration: 6000 },
+            );
+            // Switch to swap tab
+            setActiveTab("swap");
+          }}
+        />
+      );
+    }
+
+    // Show connect wallet message if no wallet is connected for other tabs
     if (!address) {
       return <ConnectWallet />;
     }
@@ -69,7 +94,9 @@ const Home: NextPage = () => {
             </div>
           </div>
           {/* Tab Content */}
-          <div className="flex justify-center items-center">{renderTabContent()}</div>
+          <div className={`flex justify-center items-center ${activeTab === "walkthrough" ? "w-full" : ""}`}>
+            {renderTabContent()}
+          </div>
         </div>
       </div>
     </>
