@@ -4,7 +4,11 @@ import { tokenAbi } from "../../constants/Token";
 import { parseUnits } from "viem";
 import { useAccount, useWriteContract } from "wagmi";
 
-export function useFaucet() {
+interface UseFaucetProps {
+  refetchAllBalances?: () => Promise<any>;
+}
+
+export function useFaucet({ refetchAllBalances }: UseFaucetProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
@@ -32,6 +36,18 @@ export function useFaucet() {
           args: [mintAmount],
         }),
       ]);
+
+      // Wait a moment for blockchain to process both transactions
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Refetch balances after successful minting
+      if (refetchAllBalances) {
+        try {
+          await refetchAllBalances();
+        } catch (error) {
+          console.error("Failed to refresh balances after token mint:", error);
+        }
+      }
 
       return true;
     } catch (error) {

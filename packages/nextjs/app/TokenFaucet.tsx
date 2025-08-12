@@ -59,9 +59,8 @@ export function TokenFaucet() {
       // Refetch balances after successful mint
       try {
         await tokenBalances.refetchTokenBalance(selectedToken);
-        console.log(`✅ ${selectedToken} balance refreshed after mint`);
       } catch (error) {
-        console.error(`❌ Failed to refresh ${selectedToken} balance after mint:`, error);
+        console.error(`Failed to refresh ${selectedToken} balance after mint:`, error);
       }
     } catch (error) {
       console.error("Mint failed:", error);
@@ -86,9 +85,8 @@ export function TokenFaucet() {
       // Refetch balances after successful burn
       try {
         await tokenBalances.refetchTokenBalance(selectedToken);
-        console.log(`✅ ${selectedToken} balance refreshed after burn`);
       } catch (error) {
-        console.error(`❌ Failed to refresh ${selectedToken} balance after burn:`, error);
+        console.error(`Failed to refresh ${selectedToken} balance after burn:`, error);
       }
     } catch (error) {
       console.error("Burn failed:", error);

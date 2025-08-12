@@ -13,6 +13,9 @@ export function useTokenBalances() {
     args: [address!],
     query: {
       enabled: isConnected && !!address,
+      // Reduce cache time to ensure fresher data
+      staleTime: 5000, // 5 seconds
+      gcTime: 10000, // 10 seconds
     },
   });
 
@@ -23,6 +26,9 @@ export function useTokenBalances() {
     args: [address!],
     query: {
       enabled: isConnected && !!address,
+      // Reduce cache time to ensure fresher data
+      staleTime: 5000, // 5 seconds
+      gcTime: 10000, // 10 seconds
     },
   });
 
@@ -42,7 +48,12 @@ export function useTokenBalances() {
   };
 
   const refetchAllBalances = useCallback(async () => {
-    await Promise.all([refetchCphBalance(), refetchMskBalance()]);
+    const results = await Promise.all([refetchCphBalance(), refetchMskBalance()]);
+
+    // Force a small delay to ensure React has time to re-render with new data
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    return results;
   }, [refetchCphBalance, refetchMskBalance]);
 
   const refetchTokenBalance = useCallback(

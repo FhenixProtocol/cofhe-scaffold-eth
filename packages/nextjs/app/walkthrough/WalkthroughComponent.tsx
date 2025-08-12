@@ -84,10 +84,10 @@ export function WalkthroughComponent({ onFinish }: WalkthroughComponentProps = {
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
   const { targetNetwork } = useTargetNetwork();
-  const { cphRawBalance, mskRawBalance } = useTokenBalances();
+  const { cphRawBalance, mskRawBalance, refetchAllBalances } = useTokenBalances();
   const { isEncryptingInput, onEncryptInput } = useEncryptInput();
   const marketOrderStatus = useMarketOrderStatus();
-  const { claimTokens, isLoading: isFaucetLoading } = useFaucet();
+  const { claimTokens, isLoading: isFaucetLoading } = useFaucet({ refetchAllBalances });
 
   // Add market order events monitoring for decryption polling
   useMarketOrderEvents({
@@ -126,6 +126,18 @@ export function WalkthroughComponent({ onFinish }: WalkthroughComponentProps = {
   const formattedAmount = amount && Number(amount) > 0 ? parseUnits(amount, 18) : 0n;
   const tokenAllowance = useTokenAllowance(selectedToken, formattedAmount, "market");
 
+  // Balance validation helper
+  const hasInsufficientBalance = useCallback((): boolean => {
+    if (!amount || Number(amount) === 0) return false;
+    try {
+      const requiredAmount = parseUnits(amount, 18);
+      const currentBalance = selectedToken === "CPH" ? cphRawBalance : mskRawBalance;
+      return currentBalance < requiredAmount;
+    } catch {
+      return true;
+    }
+  }, [amount, selectedToken, cphRawBalance, mskRawBalance]);
+
   // Step progression logic
   const canProceedFromStep = useCallback(
     (stepIndex: number): boolean => {
@@ -148,19 +160,16 @@ export function WalkthroughComponent({ onFinish }: WalkthroughComponentProps = {
           return false;
       }
     },
-    [amount, encryptedObject, cphRawBalance, mskRawBalance, tokenAllowance.hasEnoughAllowance, marketOrderStatus],
+    [
+      amount,
+      encryptedObject,
+      cphRawBalance,
+      mskRawBalance,
+      tokenAllowance.hasEnoughAllowance,
+      marketOrderStatus,
+      hasInsufficientBalance,
+    ],
   );
-
-  const hasInsufficientBalance = useCallback((): boolean => {
-    if (!amount || Number(amount) === 0) return false;
-    try {
-      const requiredAmount = parseUnits(amount, 18);
-      const currentBalance = selectedToken === "CPH" ? cphRawBalance : mskRawBalance;
-      return currentBalance < requiredAmount;
-    } catch {
-      return true;
-    }
-  }, [amount, selectedToken, cphRawBalance, mskRawBalance]);
 
   // Handlers
   const handleFaucetClaim = async () => {
