@@ -36,6 +36,7 @@ interface UseBusinessLogicProps {
   setIsSwapLoading: (loading: boolean) => void;
   updateOrderStatus: (id: string, status: "completed" | "failed") => void;
   updateOrderStatusByHandle: (handle: bigint, status: "completed" | "failed") => void;
+  refetchAllBalances: () => Promise<void>;
 }
 
 export function useBusinessLogic({
@@ -59,6 +60,7 @@ export function useBusinessLogic({
   moveToAsyncTracking,
   setIsSwapLoading,
   updateOrderStatusByHandle,
+  refetchAllBalances,
 }: UseBusinessLogicProps) {
   const { writeContractAsync } = useWriteContract();
   const { targetNetwork } = useTargetNetwork();
@@ -186,6 +188,14 @@ export function useBusinessLogic({
           // Reset loading state after transaction is submitted
           setIsSwapLoading(false);
 
+          // Refetch balances after successful swap
+          try {
+            await refetchAllBalances();
+            console.log("✅ Token balances refreshed after swap");
+          } catch (error) {
+            console.error("❌ Failed to refresh balances after swap:", error);
+          }
+
           // Clear swap transaction hash after showing notification
           setTimeout(() => {
             setSwapTransactionHash(null);
@@ -273,6 +283,7 @@ export function useBusinessLogic({
     setTransactionHash,
     setIsSwapLoading,
     targetNetwork.id,
+    refetchAllBalances,
   ]);
 
   const isSubmitDisabled = useMemo(() => {

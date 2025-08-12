@@ -138,6 +138,7 @@ export function SwapComponent() {
     setIsSwapLoading,
     updateOrderStatus: asyncOrders.updateOrderStatus,
     updateOrderStatusByHandle: asyncOrders.updateOrderStatusByHandle,
+    refetchAllBalances: tokenBalances.refetchAllBalances,
   });
 
   // Handlers

@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { CIPHER_TOKEN, MASK_TOKEN } from "../constants/Constants";
 import { erc20Abi, formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
@@ -5,7 +6,7 @@ import { useAccount, useReadContract } from "wagmi";
 export function useTokenBalances() {
   const { address, isConnected } = useAccount();
 
-  const { data: cphBalance } = useReadContract({
+  const { data: cphBalance, refetch: refetchCphBalance } = useReadContract({
     abi: erc20Abi,
     address: CIPHER_TOKEN,
     functionName: "balanceOf",
@@ -15,7 +16,7 @@ export function useTokenBalances() {
     },
   });
 
-  const { data: mskBalance } = useReadContract({
+  const { data: mskBalance, refetch: refetchMskBalance } = useReadContract({
     abi: erc20Abi,
     address: MASK_TOKEN,
     functionName: "balanceOf",
@@ -40,10 +41,27 @@ export function useTokenBalances() {
     return num.toExponential(2);
   };
 
+  const refetchAllBalances = useCallback(async () => {
+    await Promise.all([refetchCphBalance(), refetchMskBalance()]);
+  }, [refetchCphBalance, refetchMskBalance]);
+
+  const refetchTokenBalance = useCallback(
+    async (token: "CPH" | "MSK") => {
+      if (token === "CPH") {
+        await refetchCphBalance();
+      } else {
+        await refetchMskBalance();
+      }
+    },
+    [refetchCphBalance, refetchMskBalance],
+  );
+
   return {
     cphFormattedBalance: formatBalance(cphBalance),
     mskFormattedBalance: formatBalance(mskBalance),
     cphRawBalance: cphBalance || 0n,
     mskRawBalance: mskBalance || 0n,
+    refetchAllBalances,
+    refetchTokenBalance,
   };
 }
