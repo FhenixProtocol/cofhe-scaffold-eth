@@ -25,48 +25,52 @@ import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth";
 const WALKTHROUGH_STEPS = [
   {
     id: "getting-started",
-    title: "Welcome to FHE Trading",
-    header: "Get Test Tokens",
+    title: "Getting Started",
+    header: "FHE Market Order Hook",
     description:
-      "Start by claiming test tokens from our faucet to experience private trading with Fully Homomorphic Encryption.",
+      "This walkthrough guides you through using the FHE Market Order Hook, built on Fhenix's CoFHE coprocessor. In this walkthrough you will encrypt your order intent using FHE (Fully Homomorphic Encryption), create an encrypted market order, and manually execute that market order.",
   },
   {
     id: "select-amount",
-    title: "Configure Trade",
-    header: "Select Amount & Approve",
+    title: "Select how much to encrypt",
+    header: "Swap Amount",
     description:
-      "Set your trade parameters and grant the contract permission to access your tokens for the transaction.",
+      "An encrypted market order is the same as a public swap order. You will be required to enter the amount to swap, and direction. Enter and approve the amount of tokens you want to swap below.",
   },
   {
     id: "encrypt-input",
-    title: "Privacy Layer",
-    header: "Encrypt Your Trade Amount",
+    title: "Encrypt the input value",
+    header: "Encrypt your intent",
     description:
-      "Protect your trading strategy by encrypting the amount, making it invisible to MEV bots and front-runners.",
+      "We will now encrypt the amount you have selected to swap. By encrypting this amount off-chain, and passing an already encrypted value into the market order hook, your 'intent' is hidden from prying eyes looking at the mempool. This means that your order cannot be frontrun which costs you MEV. This encryption step uses `cofhejs` a typescript package built to interact with the CoFHE coprocessor.",
   },
   {
     id: "create-order",
-    title: "Blockchain Submission",
-    header: "Create Encrypted Market Order",
-    description: "Send your private order to the blockchain where it joins the queue for optimal execution timing.",
+    title: "Create an encrypted order",
+    header: "Submit your encrypted order",
+    description:
+      "With your encrypted swap amount, we can add the additional necessary swap data. Submit your order below",
   },
   {
     id: "wait-decryption",
-    title: "Processing Phase",
-    header: "Order Decryption in Progress",
-    description: "The network processes your encrypted order, revealing the amount only when execution is optimal.",
+    title: "Wait for the encrypted order to be decrypted",
+    header: "On-chain order decryption",
+    description:
+      "Now that your order has been submitted, it is decrypted on-chain. This decryption process happens automatically behind the scenes. As soon as the on-chain decryption has been completed, the order will be executed before any other swaps can take place, protecting your trade from frontrunning. Below you will see the decryption status of your order, along with its position in the queue",
   },
   {
     id: "execute-order",
-    title: "Trade Execution",
-    header: "Trigger Order Settlement",
-    description: "Complete your trade either automatically through pool activity or manually via force execution.",
+    title: '"Force" the order to be executed',
+    header: "Execute the order",
+    description:
+      "Orders are executed in three situations: 1. A public trade takes place in the pool. 2. Another encrypted market order is submitted. 3. The encrypted order is manually executed. Both 1 and 2 will execute your order *before* any other trades happen. You can manually execute your order below.",
   },
   {
     id: "view-transaction",
-    title: "Success!",
-    header: "Trade Summary",
-    description: "Review your completed private trade and explore the transaction details to see FHE in action.",
+    title: "See your swap (etherscan + cofhescan)",
+    header: "Review",
+    description:
+      'Your order has been successfully executed, and the LINK you swapped for is now in your wallet. Once you are finished exploring your order, click "FINISH" or "RESTART".',
   },
 ];
 
@@ -301,7 +305,7 @@ export function WalkthroughComponent({ onFinish }: WalkthroughComponentProps = {
           <div className="text-center space-y-4">
             <div className="text-6xl mb-4">⏳</div>
             <p className="text-lg">
-              This usually takes 1-2 minutes as the system securely processes your encrypted data.
+              This usually takes less than 1 second as the system securely processes your encrypted data.
             </p>
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
               <div className="space-y-2 text-sm">

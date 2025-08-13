@@ -29,14 +29,6 @@ export function CreateOrderStep({
 
   return (
     <div className="space-y-6">
-      <div className="text-center">
-        <h3 className="text-lg font-semibold mb-3">Submit Encrypted Market Order</h3>
-        <p className="text-gray-600 dark:text-gray-400">
-          Now we&apos;ll submit your encrypted market order to the blockchain. This order will be queued until it can be
-          executed at the best available price.
-        </p>
-      </div>
-
       {/* Order Summary */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
         <h4 className="font-medium mb-3">Order Summary</h4>

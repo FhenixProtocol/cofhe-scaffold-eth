@@ -68,14 +68,6 @@ export function SelectAmountStep({
 
   return (
     <div className="space-y-6">
-      <div className="text-center">
-        <h3 className="text-lg font-semibold mb-3">Choose Amount to Trade</h3>
-        <p className="text-gray-600 dark:text-gray-400">
-          Select which token you want to trade and enter the amount. We&apos;ll need to approve the contract to spend
-          your tokens.
-        </p>
-      </div>
-
       {/* Token Selection */}
       <div className="space-y-4">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Select Token</label>

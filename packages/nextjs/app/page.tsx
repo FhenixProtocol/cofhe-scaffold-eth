@@ -20,8 +20,8 @@ interface MainTab {
 const MAIN_TABS: MainTab[] = [
   { id: "swap", label: "Swap" },
   { id: "faucet", label: "Token Faucet" },
-  { id: "pool", label: "Pool" },
   { id: "walkthrough", label: "Walkthrough" },
+  { id: "pool", label: "Pool" },
 ];
 
 const Home: NextPage = () => {

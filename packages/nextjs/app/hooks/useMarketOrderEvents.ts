@@ -73,11 +73,10 @@ export function useMarketOrderEvents({
       setConfirmationStep(TxGuideStepState.Success);
       setDecryptionStep(TxGuideStepState.Loading);
 
-      // Set settlement step to Success immediately when order is queued
-      // This prevents it from being set to Loading again later
-      setSettlementStep(TxGuideStepState.Success);
+      // Keep settlement step at Ready - order is placed but not yet settled
+      // Only OrderSettled events should set this to Success
     },
-    [orderPlacedDetected, setEncryptedValue, setConfirmationStep, setDecryptionStep, setSettlementStep],
+    [orderPlacedDetected, setEncryptedValue, setConfirmationStep, setDecryptionStep],
   );
 
   // Watch for transaction confirmation

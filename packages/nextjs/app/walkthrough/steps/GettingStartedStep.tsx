@@ -15,14 +15,6 @@ export function GettingStartedStep({ onFaucetClaim, isFaucetLoading }: GettingSt
 
   return (
     <div className="space-y-4">
-      <div className="text-center">
-        <h3 className="text-lg font-semibold mb-3">Get Test Tokens</h3>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">
-          To use the FHE trading system, you&apos;ll need test tokens. Click the button below to mint tokens to your
-          wallet.
-        </p>
-      </div>
-
       {/* Current Balance Display */}
       <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
         <h4 className="font-medium mb-2">Your Current Balance:</h4>

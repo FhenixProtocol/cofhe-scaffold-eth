@@ -19,14 +19,6 @@ export function EncryptInputStep({
 
   return (
     <div className="space-y-6">
-      <div className="text-center">
-        <h3 className="text-lg font-semibold mb-3">Encrypt Your Trade Amount</h3>
-        <p className="text-gray-600 dark:text-gray-400">
-          For privacy, we&apos;ll encrypt your trade amount using Fully Homomorphic Encryption (FHE). This keeps your
-          trading intentions hidden from other users and MEV bots.
-        </p>
-      </div>
-
       {/* Trade Details */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
         <h4 className="font-medium mb-2">Trade Details</h4>
