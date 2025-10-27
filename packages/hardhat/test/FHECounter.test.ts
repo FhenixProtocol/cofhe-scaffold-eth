@@ -139,7 +139,17 @@ describe("Counter", function () {
       // `cofhejs.encrypt` is used to encrypt the value
       // cofhejs must be initialized before `encrypt` can be called
       const config = await hre.cofhesdk.createCofhesdkConfig({
-        supportedChains: [],
+        supportedChains: [
+          {
+            name: "test",
+            environment: "MOCK",
+            coFheUrl: "https://should-be-removed.example.com",
+            verifierUrl: "https://should-be-removed.example.com",
+            thresholdNetworkUrl: "https://should-be-removed.example.com",
+            id: 31337,
+            network: "test",
+          },
+        ],
         // permitGeneration: "ON_CONNECT",
       });
 
@@ -160,16 +170,19 @@ describe("Counter", function () {
 
       const permit = (await cofhesdkClient.permits.createSelf({ issuer: bob.address })).data;
       const active_permit = await cofhesdkClient.permits.getActivePermit();
+      const active_permit_data = active_permit.data;
+      console.log("ACTIVE PERMIT", active_permit);
       // debugger;
-      if (!permit) throw new Error("No permit");
+      if (!active_permit_data) throw new Error("No permit");
       const unsealedResult = await cofhesdkClient
         .decryptHandle(count, FheTypes.Uint32)
-        .setPermit(permit)
+        .setPermit(active_permit_data)
         .setChainId(31337) // optional
         .setAccount(bob.address) // optional
         .decrypt();
-      debugger;
       console.log("UNSEALED RESULT", unsealedResult);
+      debugger;
+
       await hre.cofhesdk.expectResultValue(unsealedResult, 5n);
     });
   });
