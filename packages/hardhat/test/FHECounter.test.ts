@@ -3,6 +3,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import hre from "hardhat";
 // import { Encryptable, FheTypes, type CofhesdkClient, type Result, CofhesdkErrorCode, CofhesdkError } from '@/core';
 import { Encryptable, FheTypes } from "@cofhe/sdk";
+import { PermitUtils } from "@cofhe/sdk/permits";
 import { arbSepolia } from "@cofhe/sdk/chains";
 // import { cofhejs } from "cofhejs/node";
 import cofhesdk from "@cofhe/sdk";
@@ -168,15 +169,31 @@ describe("Counter", function () {
       const count = await counter.count();
       await hre.cofhesdk.mocks.expectPlaintext(count, 5n);
 
-      const permit = (await cofhesdkClient.permits.createSelf({ issuer: bob.address })).data;
-      const active_permit = await cofhesdkClient.permits.getActivePermit();
-      const active_permit_data = active_permit.data;
-      console.log("ACTIVE PERMIT", active_permit);
+      // const permit = (await cofhesdkClient.permits.createSelf({ issuer: bob.address })).data;
+      const permit = await PermitUtils.createSelfAndSign(
+        {
+          issuer: bob.address,
+          name: "Test Permit",
+        },
+        publicClient,
+        walletClient,
+      );
+      //  {
+      //   "name": "ACL",
+      //   "version": "1",
+      //   "chainId": 31337,
+      //   "verifyingContract": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+      // }
+      console.log("permit", JSON.stringify(permit, null, 2));
+      debugger;
+      // const active_permit = await cofhesdkClient.permits.getActivePermit();
+      // const active_permit_data = active_permit.data;
+      // console.log("ACTIVE PERMIT", active_permit);
       // debugger;
-      if (!active_permit_data) throw new Error("No permit");
+      // if (!active_permit_data) throw new Error("No permit");
       const unsealedResult = await cofhesdkClient
         .decryptHandle(count, FheTypes.Uint32)
-        .setPermit(active_permit_data)
+        .setPermit(permit)
         .setChainId(31337) // optional
         .setAccount(bob.address) // optional
         .decrypt();
