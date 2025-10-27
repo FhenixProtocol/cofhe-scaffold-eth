@@ -3,6 +3,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import hre from "hardhat";
 // import { Encryptable, FheTypes, type CofhesdkClient, type Result, CofhesdkErrorCode, CofhesdkError } from '@/core';
 import { Encryptable, FheTypes } from "@cofhe/sdk";
+import { arbSepolia } from "@cofhe/sdk/chains";
 // import { cofhejs } from "cofhejs/node";
 import cofhesdk from "@cofhe/sdk";
 
@@ -139,6 +140,7 @@ describe("Counter", function () {
       // cofhejs must be initialized before `encrypt` can be called
       const config = await hre.cofhesdk.createCofhesdkConfig({
         supportedChains: [],
+        // permitGeneration: "ON_CONNECT",
       });
 
       console.log("CONFIG", config);
@@ -151,13 +153,24 @@ describe("Counter", function () {
       const [encryptedInput] = await hre.cofhesdk.expectResultSuccess(encryptResult);
       await hre.cofhesdk.mocks.expectPlaintext(encryptedInput.ctHash, 5n);
 
-      // await counter.connect(bob).set(encryptedInput);
+      await counter.connect(bob).set(encryptedInput);
 
-      // const count = await counter.count();
-      // await hre.cofhesdk.mocks.expectPlaintext(count, 5n);
+      const count = await counter.count();
+      await hre.cofhesdk.mocks.expectPlaintext(count, 5n);
 
-      // const unsealedResult = await cofhesdkClient.decryptHandle(count, FheTypes.Uint32).decrypt();
-      // await hre.cofhesdk.expectResultValue(unsealedResult, 5n);
+      const permit = (await cofhesdkClient.permits.createSelf({ issuer: bob.address })).data;
+      const active_permit = await cofhesdkClient.permits.getActivePermit();
+      // debugger;
+      if (!permit) throw new Error("No permit");
+      const unsealedResult = await cofhesdkClient
+        .decryptHandle(count, FheTypes.Uint32)
+        .setPermit(permit)
+        .setChainId(31337) // optional
+        .setAccount(bob.address) // optional
+        .decrypt();
+      debugger;
+      console.log("UNSEALED RESULT", unsealedResult);
+      await hre.cofhesdk.expectResultValue(unsealedResult, 5n);
     });
   });
 });
