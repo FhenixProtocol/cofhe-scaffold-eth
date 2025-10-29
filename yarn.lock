@@ -202,12 +202,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cofhe/hardhat-plugin@npm:^0.1.1":
-  version: 0.1.1
-  resolution: "@cofhe/hardhat-plugin@npm:0.1.1"
+"@cofhe/hardhat-plugin@npm:0.0.0-beta-20251028130353":
+  version: 0.0.0-beta-20251028130353
+  resolution: "@cofhe/hardhat-plugin@npm:0.0.0-beta-20251028130353"
   dependencies:
-    "@cofhe/mock-contracts": 0.1.1
-    "@cofhe/sdk": 0.1.1
+    "@cofhe/mock-contracts": 0.0.0-beta-20251028130353
+    "@cofhe/sdk": 0.0.0-beta-20251028130353
     "@fhenixprotocol/cofhe-contracts": 0.0.13
     "@openzeppelin/contracts": ^5.0.0
     "@openzeppelin/contracts-upgradeable": ^5.0.0
@@ -219,24 +219,24 @@ __metadata:
     "@nomicfoundation/hardhat-ethers": ^3.0.0
     ethers: ^5.0.0 || ^6.0.0
     hardhat: ^2.0.0
-  checksum: 1d19bfdbe13b4e684e7264baeafa58913747d6e8cab87d3dbad887bd8021f2494475bceca8ef34be8be6234f9ab1004fac02824209d5beec581a925945cd89a0
+  checksum: 76abc2c84bfaf57770d8b91327ed962b882ebc2832a1679832670165772818fe1f2f81149f5430f44a1db362ed4240e76fc1b5dda202afdd4801d063d98a0d3a
   languageName: node
   linkType: hard
 
-"@cofhe/mock-contracts@npm:0.1.1":
-  version: 0.1.1
-  resolution: "@cofhe/mock-contracts@npm:0.1.1"
+"@cofhe/mock-contracts@npm:0.0.0-beta-20251028130353":
+  version: 0.0.0-beta-20251028130353
+  resolution: "@cofhe/mock-contracts@npm:0.0.0-beta-20251028130353"
   dependencies:
     "@fhenixprotocol/cofhe-contracts": 0.0.13
     "@openzeppelin/contracts": ^5.0.0
     "@openzeppelin/contracts-upgradeable": ^5.0.0
-  checksum: 441e88cfa9c45d60d0fbf00f74e53bd8617be679b9a7921cf48de47998932f10f32db6bba0904dac47b765603aa6eaf868c9f2cfb43211e14ab97e6c7038f9e7
+  checksum: faae2f251402e4018c3c54191b3bd4d83dfd1eac24b2997dde065f3febba9525db2f71e3c265ba562db7b0f491cf9af4ac379389947df76540ec90afb93f7c46
   languageName: node
   linkType: hard
 
-"@cofhe/sdk@npm:0.1.1, @cofhe/sdk@npm:^0.1.1":
-  version: 0.1.1
-  resolution: "@cofhe/sdk@npm:0.1.1"
+"@cofhe/sdk@npm:0.0.0-beta-20251028130353":
+  version: 0.0.0-beta-20251028130353
+  resolution: "@cofhe/sdk@npm:0.0.0-beta-20251028130353"
   dependencies:
     idb-keyval: ^6.2.1
     immer: ^10.1.1
@@ -261,7 +261,7 @@ __metadata:
       optional: true
     hardhat:
       optional: true
-  checksum: 455cd001e111061a5f0bd69471576d1efac3c8b433b78c13e2d61039616cef06d0b9e7f6bf84237fbadb1aaf94104f7c699607e49bd41a918b95d83fc6fe48e9
+  checksum: 8360acfd27977428157c0bcfc90ceeba7d64c23526beda24a7e34e8cc9cbc65ce177280afae01fe48e056f588ca0a8fd2b0a41f902bd65a7e003e01f3daba200
   languageName: node
   linkType: hard
 
@@ -3572,8 +3572,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@se-2/hardhat@workspace:packages/hardhat"
   dependencies:
-    "@cofhe/hardhat-plugin": ^0.1.1
-    "@cofhe/sdk": ^0.1.1
+    "@cofhe/hardhat-plugin": 0.0.0-beta-20251028130353
+    "@cofhe/sdk": 0.0.0-beta-20251028130353
     "@ethersproject/abi": ~5.7.0
     "@ethersproject/providers": ~5.7.2
     "@fhenixprotocol/cofhe-contracts": 0.0.13
@@ -3624,7 +3624,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@se-2/nextjs@workspace:packages/nextjs"
   dependencies:
-    "@cofhe/sdk": ^0.1.1
+    "@cofhe/sdk": 0.0.0-beta-20251028130353
     "@heroicons/react": ~2.1.5
     "@rainbow-me/rainbowkit": 2.2.5
     "@tailwindcss/postcss": 4.0.15
