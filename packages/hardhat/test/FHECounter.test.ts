@@ -78,51 +78,50 @@ describe("Counter", function () {
     });
 
     /**
-     * @dev Tests the cofhejs unseal functionality in mock environment
+     * @dev Tests the cofhesdk unseal functionality in mock environment
      * Demonstrates:
      * - Initializing FHE with a Hardhat signer
      * - Reading and unsealing encrypted values
      * - Verifying unsealed values match expectations
      */
-    // it("cofhejs unseal (mocks)", async function () {
-    //   await hre.cofhesdk.mocks.enableLogs("cofhejs unseal (mocks)");
-    //   const { counter, bob } = await loadFixture(deployCounterFixture);
+    it("cofhesdk decrypt (mocks)", async function () {
+      await hre.cofhesdk.mocks.enableLogs("cofhejs unseal (mocks)");
+      const { counter, bob } = await loadFixture(deployCounterFixture);
 
-    //   // `hre.cofhe.initializeWithHardhatSigner` is used to initialize FHE with a Hardhat signer
-    //   // Initialization is required before any `cofhejs.unseal` or `cofhejs.encrypt` operations can be performed
-    //   // `initializeWithHardhatSigner` is a helper function that initializes FHE with a Hardhat signer
-    //   // It returns a `Promise<Result<>>` type.
+      // `hre.cofhe.initializeWithHardhatSigner` is used to initialize FHE with a Hardhat signer
+      // Initialization is required before any `cofhejs.unseal` or `cofhejs.encrypt` operations can be performed
+      // `initializeWithHardhatSigner` is a helper function that initializes FHE with a Hardhat signer
+      // It returns a `Promise<Result<>>` type.
 
-    //   // The `Result<T>` type looks like this:
-    //   // {
-    //   //   success: boolean,
-    //   //   data: T (Permit | undefined in the case of initializeWithHardhatSigner),
-    //   //   error: CofhejsError | null,
-    //   // }
-    //   const initializeResult = await hre.cofhesdk.initializeWithHardhatSigner(bob);
+      // The `Result<T>` type looks like this:
+      // {
+      //   success: boolean,
+      //   data: T (Permit | undefined in the case of initializeWithHardhatSigner),
+      //   error: CofhejsError | null,
+      // }
+      const client = await hre.cofhesdk.createBatteriesIncludedCofhesdkClient(bob);
 
-    //   // `hre.cofhe.expectResultSuccess` is used to verify that the `Result` is successful (success: true)
-    //   // If the `Result` is not successful, the test will fail
-    //   await hre.cofhesdk.expectResultSuccess(initializeResult);
+      // `hre.cofhe.expectResultSuccess` is used to verify that the `Result` is successful (success: true)
+      // If the `Result` is not successful, the test will fail
+      const count = await counter.count();
+      await hre.cofhesdk.expectResultSuccess(client.initializationResults.keyFetchResult);
 
-    //   const count = await counter.count();
+      // `decryptHandle` is used to unseal the encrypted value
+      // the client must be initialized before `unseal` can be called
+      const unsealedResult = await client.decryptHandle(count, FheTypes.Uint32).decrypt();
 
-    //   // `cofhejs.unseal` is used to unseal the encrypted value
-    //   // cofhejs must be initialized before `unseal` can be called
-    //   const unsealedResult = await cofhesdk.unseal(count, FheTypes.Uint32);
+      // `hre.cofhe.expectResultValue` is used to verify that the `Result.data` is the expected value
+      // If the `Result.data` is not the expected value, the test will fail
+      await hre.cofhesdk.expectResultValue(unsealedResult, 0n);
 
-    //   // `hre.cofhe.expectResultValue` is used to verify that the `Result.data` is the expected value
-    //   // If the `Result.data` is not the expected value, the test will fail
-    //   await hre.cofhe.expectResultValue(unsealedResult, 0n);
+      await counter.connect(bob).increment();
 
-    //   await counter.connect(bob).increment();
+      const count2 = await counter.count();
+      const unsealedResult2 = await client.decryptHandle(count2, FheTypes.Uint32).decrypt();
+      await hre.cofhesdk.expectResultValue(unsealedResult2, 1n);
 
-    //   const count2 = await counter.count();
-    //   const unsealedResult2 = await cofhejs.unseal(count2, FheTypes.Uint32);
-    //   await hre.cofhe.expectResultValue(unsealedResult2, 1n);
-
-    //   await hre.cofhe.mocks.disableLogs();
-    // });
+      await hre.cofhesdk.mocks.disableLogs();
+    });
 
     /**
      * @dev Tests the cofhesdk encryption and value setting functionality
