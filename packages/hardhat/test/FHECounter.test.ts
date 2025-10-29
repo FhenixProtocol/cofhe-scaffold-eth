@@ -125,21 +125,21 @@ describe("Counter", function () {
     // });
 
     /**
-     * @dev Tests the cofhejs encryption and value setting functionality
+     * @dev Tests the cofhesdk encryption and value setting functionality
      * Demonstrates:
-     * - Encrypting values using cofhejs
+     * - Encrypting values using cofhesdk
      * - Setting encrypted values in the contract
      * - Verifying encrypted values using both mocks and unsealing
      */
-    it("cofhejs encrypt (mocks)", async function () {
+    it("cofhesdk encrypt (mocks)", async function () {
       const { counter, bob } = await loadFixture(deployCounterFixture);
 
       const client = await hre.cofhesdk.createBatteriesIncludedCofhesdkClient(bob);
 
       await hre.cofhesdk.expectResultSuccess(client.initializationResults.keyFetchResult);
 
-      // `cofhejs.encrypt` is used to encrypt the value
-      // cofhejs must be initialized before `encrypt` can be called
+      // `encryptInputs` is used to encrypt the value
+      // the client must be initialized before `encryptInputs` can be called
       const encryptResult = await client.encryptInputs([Encryptable.uint32(5n)]).encrypt();
 
       const [encryptedInput] = await hre.cofhesdk.expectResultSuccess(encryptResult);
