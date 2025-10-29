@@ -42,7 +42,7 @@ describe("Counter", function () {
     beforeEach(function () {
       // if (!hre.cofhesdk.isPermittedEnvironment("MOCK")) this.skip();
       // NOTE: Uncomment for global logging
-      hre.cofhesdk.mocks.enableLogs();
+      // hre.cofhesdk.mocks.enableLogs();
     });
 
     afterEach(function () {
@@ -134,6 +134,8 @@ describe("Counter", function () {
     it("cofhejs encrypt (mocks)", async function () {
       const { counter, bob } = await loadFixture(deployCounterFixture);
 
+      // const client = await hre.cofhesdk.createBatteriesIncludedCofhesdkClient(bob);
+
       const { publicClient, walletClient } = await hre.cofhesdk.hardhatSignerAdapter(bob);
       // await hre.cofhesdk.expectResultSuccess(initializeResult);
 
@@ -143,7 +145,6 @@ describe("Counter", function () {
         supportedChains: [hardhat],
       });
 
-      console.log("CONFIG", config);
       const cofhesdkClient = hre.cofhesdk.createCofhesdkClient(config);
 
       await cofhesdkClient.connect(publicClient, walletClient);
@@ -161,39 +162,8 @@ describe("Counter", function () {
       await cofhesdkClient.permits.createSelf({
         issuer: bob.address,
       });
-      const permit = await cofhesdkClient.permits.getActivePermit();
-      console.log("PERMIT", permit);
-      // // const permit = (await cofhesdkClient.permits.createSelf({ issuer: bob.address })).data;
-      // const permit = await PermitUtils.createSelfAndSign(
-      //   {
-      //     issuer: bob.address,
-      //     name: "Test Permit",
-      //   },
-      //   publicClient,
-      //   walletClient,
-      // );
-      //  {
-      //   "name": "ACL",
-      //   "version": "1",
-      //   "chainId": 31337,
-      //   "verifyingContract": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
-      // }
-      // console.log("permit", JSON.stringify(permit, null, 2));
-      // debugger;
-      // const active_permit = await cofhesdkClient.permits.getActivePermit();
-      // const active_permit_data = active_permit.data;
-      // console.log("ACTIVE PERMIT", active_permit);
-      // debugger;
-      // if (!active_permit_data) throw new Error("No permit");
 
-      const unsealedResult = await cofhesdkClient
-        .decryptHandle(count, FheTypes.Uint32)
-        // .setPermit(permit)
-        // .setChainId(31337) // optional
-        // .setAccount(bob.address) // optional
-        .decrypt();
-      console.log("UNSEALED RESULT", unsealedResult);
-      debugger;
+      const unsealedResult = await cofhesdkClient.decryptHandle(count, FheTypes.Uint32).decrypt();
 
       await hre.cofhesdk.expectResultValue(unsealedResult, 5n);
     });
