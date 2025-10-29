@@ -173,9 +173,6 @@ const config: HardhatUserConfig = {
   sourcify: {
     enabled: false,
   },
-  cofhe: {
-    logMocks: true, // Optional: Set to true to log mock operations
-  },
 };
 
 // Extend the deploy task
