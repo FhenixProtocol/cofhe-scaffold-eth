@@ -1,13 +1,12 @@
 import { useRef } from "react";
-import { Permit } from "cofhejs/web";
+import { Permit } from "@cofhe/sdk/permits";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { ShieldCheckIcon } from "@heroicons/react/24/solid";
 import {
   useCofhejsActivePermit,
   useCofhejsAllPermits,
   useCofhejsModalStore,
-  useCofhejsRemovePermit,
-  useCofhejsSetActivePermit,
+  useCofhejsRemovePermit, // useCofhejsSetActivePermit,
   useCofhejsStatus,
 } from "~~/app/useCofhejs";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
@@ -120,9 +119,9 @@ const InfoRow = ({
  * Shows a placeholder message when no permits are available.
  */
 const AllPermitsList = () => {
-  const activePermit = useCofhejsActivePermit();
+  // const activePermit = useCofhejsActivePermit();
   const allPermits = useCofhejsAllPermits();
-  const removePermit = useCofhejsRemovePermit();
+  // const removePermit = useCofhejsRemovePermit();
 
   if (allPermits.length === 0) {
     return (
@@ -134,10 +133,10 @@ const AllPermitsList = () => {
 
   return (
     <div className="flex flex-col gap-1 mt-1">
-      {allPermits.map(({ data: permit, success }, index) => {
+      {/* {allPermits.map(({ data: permit, success }, index) => {
         if (!success || !permit || permit.getHash() === activePermit?.getHash()) return null;
         return <PermitItem key={index} permit={permit} isActive={false} onRemove={removePermit} />;
-      })}
+      })} */}
     </div>
   );
 };
@@ -157,14 +156,14 @@ const AllPermitsList = () => {
 const PermitItem = ({
   permit,
   isActive,
-  onRemove,
+  // onRemove,
 }: {
   permit: Permit;
   isActive: boolean;
   onRemove: (hash: string) => void;
 }) => {
-  const setActivePermit = useCofhejsSetActivePermit();
-  const hash = permit.getHash();
+  // const setActivePermit = useCofhejsSetActivePermit();
+  const hash = "123213213"; // permit.getHash();
 
   return (
     <div className="flex flex-col bg-base-300/30 p-2 rounded-lg">
@@ -191,12 +190,15 @@ const PermitItem = ({
       />
       {!isActive && (
         <div className="flex justify-start gap-2 mt-2">
-          <div className="btn btn-xs btn-cofhe" onClick={() => setActivePermit(permit.getHash())}>
+          <div
+            className="btn btn-xs btn-cofhe"
+            // onClick={() => setActivePermit(permit.getHash())}
+          >
             Use
           </div>
           <div
             className="btn btn-ghost btn-xs text-error hover:text-error hover:bg-error/10"
-            onClick={() => onRemove(permit.getHash())}
+            // onClick={() => onRemove(permit.getHash())}
             title="Remove permit"
           >
             Delete

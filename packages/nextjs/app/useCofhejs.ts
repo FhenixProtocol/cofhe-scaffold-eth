@@ -1,40 +1,48 @@
 import { useCallback, useMemo } from "react";
 import { useEffect } from "react";
-import { PermitOptions, cofhejs, permitStore } from "cofhejs/web";
-import { PublicClient, WalletClient, createWalletClient, http } from "viem";
-import { PrivateKeyAccount, privateKeyToAccount } from "viem/accounts";
+import { Result } from "@cofhe/sdk";
+import {
+  CreateSelfPermitOptions,
+  CreateSharingPermitOptions,
+  Permit,
+  PermitUtils,
+  permitStore,
+} from "@cofhe/sdk/permits";
+import { createCofhesdkClient, createCofhesdkConfig } from "@cofhe/sdk/web";
+// import { PublicClient, WalletClient, createWalletClient, http } from "viem";
+// import { PrivateKeyAccount, privateKeyToAccount } from "viem/accounts";
 import * as chains from "viem/chains";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
-import { create, useStore } from "zustand";
-import { useShallow } from "zustand/react/shallow";
+import { create } from "zustand";
+// import { useShallow } from "zustand/react/shallow";
 import scaffoldConfig from "~~/scaffold.config";
 import { logBlockMessage, logBlockMessageAndEnd, logBlockStart } from "~~/utils/cofhe/logging";
 import { notification } from "~~/utils/scaffold-eth";
 
-const ChainEnvironments = {
-  // Ethereum
-  [chains.mainnet.id]: "MAINNET",
-  // Arbitrum
-  [chains.arbitrum.id]: "MAINNET",
-  // Ethereum Sepolia
-  [chains.sepolia.id]: "TESTNET",
-  // Arbitrum Sepolia
-  [chains.arbitrumSepolia.id]: "TESTNET",
-  // Hardhat
-  [chains.hardhat.id]: "MOCK",
-} as const;
+// const ChainEnvironments = {
+//   // Ethereum
+//   [chains.mainnet.id]: "MAINNET",
+//   // Arbitrum
+//   [chains.arbitrum.id]: "MAINNET",
+//   // Ethereum Sepolia
+//   [chains.sepolia.id]: "TESTNET",
+//   // Arbitrum Sepolia
+//   [chains.arbitrumSepolia.id]: "TESTNET",
+//   // Hardhat
+//   [chains.hardhat.id]: "MOCK",
+// } as const;
 
 // ZKV SIGNER
 
-const zkvSignerPrivateKey = "0x6C8D7F768A6BB4AAFE85E8A2F5A9680355239C7E14646ED62B044E39DE154512";
-function createWalletClientFromPrivateKey(publicClient: PublicClient, privateKey: `0x${string}`): WalletClient {
-  const account: PrivateKeyAccount = privateKeyToAccount(privateKey);
-  return createWalletClient({
-    account,
-    chain: publicClient.chain,
-    transport: http(publicClient.transport.url),
-  });
-}
+// const zkvSignerPrivateKey = "0x6C8D7F768A6BB4AAFE85E8A2F5A9680355239C7E14646ED62B044E39DE154512";
+// function createWalletClientFromPrivateKey(publicClient: PublicClient, privateKey: `0x${string}`): WalletClient {
+//   const account: PrivateKeyAccount = privateKeyToAccount(privateKey);
+//   return createWalletClient({
+//     account,
+//     chain: publicClient.chain,
+//     transport: http(publicClient.transport.url),
+//   });
+// }
 
 // COFHEJS
 
@@ -51,6 +59,11 @@ export const useIsConnectedChainSupported = () => {
   );
 };
 
+const config = createCofhesdkConfig({
+  supportedChains: [],
+});
+export const cofhesdkClient = createCofhesdkClient(config);
+
 /**
  * Hook to initialize cofhejs with the connected wallet and chain configuration
  * Handles initialization errors and displays toast notifications on success or error
@@ -62,8 +75,8 @@ export function useInitializeCofhejs() {
   const isChainSupported = useIsConnectedChainSupported();
 
   const handleError = (error: string) => {
-    console.error("cofhejs initialization error:", error);
-    notification.error(`cofhejs initialization error: ${error}`);
+    console.error("cofhe initialization error:", error);
+    notification.error(`cofhe initialization error: ${error}`);
   };
 
   useEffect(() => {
@@ -74,37 +87,43 @@ export function useInitializeCofhejs() {
       logBlockStart("useInitializeCofhejs");
       logBlockMessage("INITIALIZING     | Setting up CoFHE environment");
 
-      const chainId = publicClient?.chain.id;
-      const environment = ChainEnvironments[chainId as keyof typeof ChainEnvironments] ?? "TESTNET";
+      // const chainId = publicClient?.chain.id;
+      // const environment = ChainEnvironments[chainId as keyof typeof ChainEnvironments] ?? "TESTNET";
 
-      const viemZkvSigner = createWalletClientFromPrivateKey(publicClient, zkvSignerPrivateKey);
+      // const viemZkvSigner = createWalletClientFromPrivateKey(publicClient, zkvSignerPrivateKey);
 
       try {
-        const initializationResult = await cofhejs.initializeWithViem({
-          viemClient: publicClient,
-          viemWalletClient: walletClient,
-          environment,
-          // Whether to generate a permit for the connected account during the initialization process
-          // Recommended to set to false, and then call `cofhejs.generatePermit()` when the user is ready to generate a permit
-          // !! if **true** - will generate a permit immediately on page load !!
-          generatePermit: false,
-          // Hard coded signer for submitting encrypted inputs
-          // This is only used in the mock environment to submit the mock encrypted inputs so that they can be used in FHE ops.
-          // This has no effect in the mainnet or testnet environments.
-          mockConfig: {
-            decryptDelay: 1000,
-            zkvSigner: viemZkvSigner,
-          },
-        });
+        // TODO: are there any more async initialization results we need to wait for?
 
-        if (initializationResult.success) {
-          logBlockMessageAndEnd("SUCCESS          | CoFHE environment initialized");
-          notification.success("Cofhejs initialized successfully");
-        } else {
-          logBlockMessageAndEnd(
-            `FAILED           | ${initializationResult.error.message ?? String(initializationResult.error)}`,
-          );
-          handleError(initializationResult.error.message ?? String(initializationResult.error));
+        const connectionResult = await cofhesdkClient.connect(publicClient, walletClient);
+        handleResult("connectionResult", connectionResult);
+        const initializationResult = await cofhesdkClient.initializationResults.keyFetchResult;
+        handleResult("initializationResult", initializationResult);
+        // const initializationResult = await cf.initializeWithViem({
+        //   viemClient: publicClient,
+        //   viemWalletClient: walletClient,
+        //   environment,
+        //   // Whether to generate a permit for the connected account during the initialization process
+        //   // Recommended to set to false, and then call `cofhejs.generatePermit()` when the user is ready to generate a permit
+        //   // !! if **true** - will generate a permit immediately on page load !!
+        //   generatePermit: false,
+        //   // Hard coded signer for submitting encrypted inputs
+        //   // This is only used in the mock environment to submit the mock encrypted inputs so that they can be used in FHE ops.
+        //   // This has no effect in the mainnet or testnet environments.
+        //   mockConfig: {
+        //     decryptDelay: 1000,
+        //     zkvSigner: viemZkvSigner,
+        //   },
+        // });
+
+        notification.success("Cofhe initialized successfully");
+        function handleResult<T>(prefix: string, result: Result<T>) {
+          if (result.success) {
+            logBlockMessageAndEnd(`[handleResult:${prefix}]SUCCESS          | CoFHE environment initialization`);
+          } else {
+            logBlockMessageAndEnd(`FAILED           | ${result.error.message ?? String(initializationResult.error)}`);
+            handleError(result.error.message ?? String(initializationResult.error));
+          }
         }
       } catch (err) {
         logBlockMessageAndEnd(`FAILED           | ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -116,21 +135,21 @@ export function useInitializeCofhejs() {
   }, [walletClient, publicClient, isChainSupported]);
 }
 
-type CofhejsStoreState = ReturnType<typeof cofhejs.store.getState>;
+// type CofhejsStoreState = ReturnType<typeof cofhejs.store.getState>;
 
 /**
  * Hook to access the cofhejs store state (used internally)
  * @param selector Function to select specific state from the store
  * @returns Selected state from the cofhejs store
  */
-const useCofhejsStore = <T>(selector: (state: CofhejsStoreState) => T) => useStore(cofhejs.store, selector);
+// const useCofhejsStore = <T>(selector: (state: CofhejsStoreState) => T) => useStore(cofhejs.store, selector);
 
 /**
  * Hook to get the current account initialized in cofhejs
  * @returns The current account address or undefined
  */
 export const useCofhejsAccount = () => {
-  return useCofhejsStore(state => state.account);
+  return cofhesdkClient.getSnapshot().account;
 };
 
 /**
@@ -138,7 +157,7 @@ export const useCofhejsAccount = () => {
  * @returns The current chain ID or undefined
  */
 export const useCofhejsChainId = () => {
-  return useCofhejsStore(state => state.chainId);
+  return cofhesdkClient.getSnapshot().chainId;
 };
 
 /**
@@ -148,7 +167,11 @@ export const useCofhejsChainId = () => {
  * @returns boolean indicating if FHE keys, provider, and signer are all initialized
  */
 export const useCofhejsInitialized = () => {
-  return useCofhejsStore(state => state.fheKeysInitialized && state.providerInitialized && state.signerInitialized);
+  // const fheKeysInitialized = cofhesdkClient.initializationResults.keyFetchResult;
+  // const providerInitialized = cofhesdkClient.connected;
+  // const signerInitialized = cofhesdkClient.getSnapshot().signerInitialized;
+
+  return cofhesdkClient.connected;
 };
 
 /**
@@ -184,17 +207,6 @@ export const useCofhejsModalStore = create<CofhejsPermitModalStore>(set => ({
 
 // Permits
 
-type PermitStoreState = ReturnType<typeof permitStore.store.getState>;
-
-/**
- * Hook to access the permit store state (used internally)
- * @param selector Function to select specific state from the permit store
- * @returns Selected state from the permit store
- */
-const useCofhejsPermitStore = <T>(selector: (state: PermitStoreState) => T) => {
-  return useStore(permitStore.store, selector);
-};
-
 /**
  * Hook to get the active permit hash for the current chain and account
  * @returns The active permit hash or undefined if not set
@@ -202,10 +214,8 @@ const useCofhejsPermitStore = <T>(selector: (state: PermitStoreState) => T) => {
  */
 export const useCofhejsActivePermitHash = () => {
   const { chainId, account, initialized } = useCofhejsStatus();
-  return useCofhejsPermitStore(state => {
-    if (!initialized || !chainId || !account) return undefined;
-    return state.activePermitHash?.[chainId]?.[account];
-  });
+  if (!initialized || !chainId || !account) return undefined;
+  return cofhesdkClient.permits.getSnapshot().activePermitHash?.[chainId]?.[account];
 };
 
 /**
@@ -213,17 +223,15 @@ export const useCofhejsActivePermitHash = () => {
  * @returns The active permit object or null if not found/valid
  * Refreshes when active permit hash changes
  */
-export const useCofhejsActivePermit = () => {
+export const useCofhejsActivePermit = (): Permit | null => {
+  const { chainId, account, initialized } = useCofhejsStatus();
   const activePermitHash = useCofhejsActivePermitHash();
   return useMemo(() => {
-    const permitResult = cofhejs.getPermit(activePermitHash ?? undefined);
-    if (!permitResult) return null;
-    if (permitResult.success) {
-      return permitResult.data;
-    } else {
-      return null;
-    }
-  }, [activePermitHash]);
+    if (!initialized || !chainId || !account || !activePermitHash) return null;
+    const serializedPermit = cofhesdkClient.permits.getSnapshot().permits[chainId][account][activePermitHash] || null;
+    const permit = serializedPermit ? PermitUtils.deserialize(serializedPermit) : null;
+    return permit;
+  }, [activePermitHash, chainId, account, initialized]);
 };
 
 /**
@@ -235,7 +243,8 @@ export const useCofhejsIsActivePermitValid = () => {
   const permit = useCofhejsActivePermit();
   return useMemo(() => {
     if (!permit) return false;
-    return permit.isValid();
+    const deserializedPermit = PermitUtils.deserialize(permit);
+    return PermitUtils.isValid(deserializedPermit);
   }, [permit]);
 };
 
@@ -246,17 +255,12 @@ export const useCofhejsIsActivePermitValid = () => {
  */
 export const useCofhejsAllPermitHashes = () => {
   const { chainId, account, initialized } = useCofhejsStatus();
-  return useCofhejsPermitStore(
-    useShallow(state => {
-      if (!initialized || !chainId || !account) return [];
-      return (
-        Object.entries(state.permits?.[chainId]?.[account] ?? {})
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          .filter(([_, permit]) => permit !== undefined)
-          .map(([hash]) => hash)
-      );
-    }),
-  );
+  return useMemo(() => {
+    if (!initialized || !chainId || !account) return [];
+    const permitsForAccount = cofhesdkClient.permits.getSnapshot().permits[chainId]?.[account];
+    if (!permitsForAccount) return [];
+    return Object.keys(permitsForAccount);
+  }, [chainId, account, initialized]);
 };
 
 /**
@@ -264,11 +268,12 @@ export const useCofhejsAllPermitHashes = () => {
  * @returns Array of permit objects
  * Refreshes when permit hashes change
  */
-export const useCofhejsAllPermits = () => {
-  const permitHashes = useCofhejsAllPermitHashes();
-  return useMemo(() => {
-    return permitHashes.map(hash => cofhejs.getPermit(hash));
-  }, [permitHashes]);
+export const useCofhejsAllPermits = (): Permit[] => {
+  const { chainId, account, initialized } = useCofhejsStatus();
+  if (!initialized || !chainId || !account) return [];
+  return Object.values(cofhesdkClient.permits.getSnapshot().permits[chainId][account] || {})
+    .map(serializedPermit => (serializedPermit ? PermitUtils.deserialize(serializedPermit) : null))
+    .filter((permit): permit is Permit => permit !== null);
 };
 
 /**
@@ -279,13 +284,22 @@ export const useCofhejsAllPermits = () => {
 export const useCofhejsCreatePermit = () => {
   const { chainId, account, initialized } = useCofhejsStatus();
   return useCallback(
-    async (permit?: PermitOptions) => {
+    async (opts: CreateSelfPermitOptions | CreateSharingPermitOptions) => {
       if (!initialized || !chainId || !account) return;
-      const permitResult = await cofhejs.createPermit(permit);
+
+      async function getPermitResult() {
+        if (opts.type === "self") return cofhesdkClient.permits.createSelf(opts);
+        if (opts.type === "sharing") return cofhesdkClient.permits.createSharing(opts);
+        throw new Error("Invalid permit type");
+      }
+      const permitResult = await getPermitResult();
+
       if (permitResult.success) {
         notification.success("Permit created");
       } else {
-        notification.error(permitResult.error.message ?? String(permitResult.error));
+        notification.error(
+          "tried creating permit. Ran into error: " + (permitResult.error.message ?? String(permitResult.error)),
+        );
       }
       return permitResult;
     },

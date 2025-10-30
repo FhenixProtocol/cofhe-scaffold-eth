@@ -47,7 +47,9 @@ export const CofhejsPermitModal = () => {
   }, [setGeneratePermitModalOpen]);
 
   const handleGeneratePermit = useCallback(async () => {
-    const type = recipient ? "sharing" : "self";
+    const type: "self" | "sharing" = recipient ? "sharing" : "self";
+
+    if (!account) throw new Error("No connected account");
 
     const permitName = name.length > 0 ? name.slice(0, 24) : undefined;
 

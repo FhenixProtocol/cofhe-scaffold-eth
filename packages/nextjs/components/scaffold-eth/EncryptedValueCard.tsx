@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { FheTypes } from "cofhejs/web";
+import { FheTypes } from "@cofhe/sdk";
 import { LockClosedIcon, LockOpenIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 import { useCofhejsInitialized, useCofhejsIsActivePermitValid, useCofhejsModalStore } from "~~/app/useCofhejs";
 import { useDecryptValue } from "~~/app/useDecrypt";

@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useEncryptInput } from "./useEncryptInput";
-import { FheTypes } from "cofhejs/web";
+import { FheTypes } from "@cofhe/sdk";
 import { IntegerInput, IntegerVariant } from "~~/components/scaffold-eth";
 import { EncryptedValue } from "~~/components/scaffold-eth/EncryptedValueCard";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";

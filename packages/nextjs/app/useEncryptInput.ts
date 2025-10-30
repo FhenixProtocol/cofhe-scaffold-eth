@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useState } from "react";
-import { useCofhejsInitialized } from "./useCofhejs";
+import { cofhesdkClient, useCofhejsInitialized } from "./useCofhejs";
 import {
   Encryptable,
   EncryptableAddress,
@@ -9,11 +9,9 @@ import {
   EncryptableUint16,
   EncryptableUint32,
   EncryptableUint64,
-  EncryptableUint128,
-  EncryptableUint256,
-  FheTypes,
-  cofhejs,
-} from "cofhejs/web";
+  EncryptableUint128, // EncryptableUint256,
+  FheTypes, // cofhejs,
+} from "@cofhe/sdk";
 import {
   encryptedValueToString,
   logBlockMessage,
@@ -40,10 +38,10 @@ type EncryptableFromFheTypes<T extends FheTypes> = T extends FheTypes.Bool
           : T extends FheTypes.Uint128
             ? EncryptableUint128
             : T extends FheTypes.Uint256
-              ? EncryptableUint256
-              : T extends FheTypes.Uint160
-                ? EncryptableAddress
-                : never;
+              ? // ? EncryptableUint256
+                // : T extends FheTypes.Uint160
+                EncryptableAddress
+              : never;
 
 /**
  * Type representing the input data type for a given FHE type.
@@ -75,8 +73,8 @@ const fheTypeToEncryptable = <T extends FheTypes>(
       return Encryptable.uint64(value as string | bigint) as EncryptableFromFheTypes<T>;
     case FheTypes.Uint128:
       return Encryptable.uint128(value as string | bigint) as EncryptableFromFheTypes<T>;
-    case FheTypes.Uint256:
-      return Encryptable.uint256(value as string | bigint) as EncryptableFromFheTypes<T>;
+    // case FheTypes.Uint256:
+    //   return Encryptable.uint(value as string | bigint) as EncryptableFromFheTypes<T>;
     case FheTypes.Uint160:
       return Encryptable.address(value as string | bigint) as EncryptableFromFheTypes<T>;
     default:
@@ -118,7 +116,7 @@ export const useEncryptInput = () => {
       const encryptable = fheTypeToEncryptable<T>(fheType, value);
 
       setIsEncryptingInput(true);
-      const encryptedResult = await cofhejs.encrypt([encryptable]);
+      const encryptedResult = await cofhesdkClient.encryptInputs([encryptable]).encrypt();
       setIsEncryptingInput(false);
 
       if (!encryptedResult.success) {
