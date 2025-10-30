@@ -18,20 +18,10 @@ import scaffoldConfig from "~~/scaffold.config";
 import { logBlockMessage, logBlockMessageAndEnd, logBlockStart } from "~~/utils/cofhe/logging";
 import { notification } from "~~/utils/scaffold-eth";
 
-export const useIsConnectedChainSupported = () => {
-  const { chainId } = useAccount();
-  return useMemo(
-    () => scaffoldConfig.targetNetworks.some((network: chains.Chain) => network.id === chainId),
-    [chainId],
-  );
-};
-
 const zkvSignerPrivateKey = "0x6C8D7F768A6BB4AAFE85E8A2F5A9680355239C7E14646ED62B044E39DE154512";
 function createWalletClientFromPrivateKey(privateKey: `0x${string}`): WalletClient {
   const account: PrivateKeyAccount = privateKeyToAccount(privateKey);
-  debugger;
   const url = chains.hardhat.rpcUrls.default.http[0];
-  debugger;
   return createWalletClient({
     account,
     chain: chains.hardhat,
@@ -42,11 +32,27 @@ const mockViemZkvSigner = createWalletClientFromPrivateKey(zkvSignerPrivateKey);
 
 const config = createCofhesdkConfig({
   supportedChains: [],
+  mocks: {
+    sealOutputDelay: 1000,
+  },
   _internal: {
     zkvWalletClient: mockViemZkvSigner,
   },
 });
 export const cofhesdkClient = createCofhesdkClient(config);
+
+/**
+ * Hook to check if the currently connected chain is supported by the application
+ * @returns boolean indicating if the current chain is in the target networks list
+ * Refreshes when chainId changes
+ */
+export const useIsConnectedChainSupported = () => {
+  const { chainId } = useAccount();
+  return useMemo(
+    () => scaffoldConfig.targetNetworks.some((network: chains.Chain) => network.id === chainId),
+    [chainId],
+  );
+};
 
 /**
  * Hook to initialize cofhejs with the connected wallet and chain configuration
