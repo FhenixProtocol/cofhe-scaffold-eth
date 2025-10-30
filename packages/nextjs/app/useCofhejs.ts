@@ -9,48 +9,13 @@ import {
   permitStore,
 } from "@cofhe/sdk/permits";
 import { createCofhesdkClient, createCofhesdkConfig } from "@cofhe/sdk/web";
-// import { PublicClient, WalletClient, createWalletClient, http } from "viem";
-// import { PrivateKeyAccount, privateKeyToAccount } from "viem/accounts";
 import * as chains from "viem/chains";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { create } from "zustand";
-// import { useShallow } from "zustand/react/shallow";
 import scaffoldConfig from "~~/scaffold.config";
 import { logBlockMessage, logBlockMessageAndEnd, logBlockStart } from "~~/utils/cofhe/logging";
 import { notification } from "~~/utils/scaffold-eth";
 
-// const ChainEnvironments = {
-//   // Ethereum
-//   [chains.mainnet.id]: "MAINNET",
-//   // Arbitrum
-//   [chains.arbitrum.id]: "MAINNET",
-//   // Ethereum Sepolia
-//   [chains.sepolia.id]: "TESTNET",
-//   // Arbitrum Sepolia
-//   [chains.arbitrumSepolia.id]: "TESTNET",
-//   // Hardhat
-//   [chains.hardhat.id]: "MOCK",
-// } as const;
-
-// ZKV SIGNER
-
-// const zkvSignerPrivateKey = "0x6C8D7F768A6BB4AAFE85E8A2F5A9680355239C7E14646ED62B044E39DE154512";
-// function createWalletClientFromPrivateKey(publicClient: PublicClient, privateKey: `0x${string}`): WalletClient {
-//   const account: PrivateKeyAccount = privateKeyToAccount(privateKey);
-//   return createWalletClient({
-//     account,
-//     chain: publicClient.chain,
-//     transport: http(publicClient.transport.url),
-//   });
-// }
-
-// COFHEJS
-
-/**
- * Hook to check if the currently connected chain is supported by the application
- * @returns boolean indicating if the current chain is in the target networks list
- * Refreshes when chainId changes
- */
 export const useIsConnectedChainSupported = () => {
   const { chainId } = useAccount();
   return useMemo(
