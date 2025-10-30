@@ -9,6 +9,8 @@ import {
   permitStore,
 } from "@cofhe/sdk/permits";
 import { createCofhesdkClient, createCofhesdkConfig } from "@cofhe/sdk/web";
+import { WalletClient, createWalletClient, http } from "viem";
+import { PrivateKeyAccount, privateKeyToAccount } from "viem/accounts";
 import * as chains from "viem/chains";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { create } from "zustand";
@@ -24,8 +26,25 @@ export const useIsConnectedChainSupported = () => {
   );
 };
 
+const zkvSignerPrivateKey = "0x6C8D7F768A6BB4AAFE85E8A2F5A9680355239C7E14646ED62B044E39DE154512";
+function createWalletClientFromPrivateKey(privateKey: `0x${string}`): WalletClient {
+  const account: PrivateKeyAccount = privateKeyToAccount(privateKey);
+  debugger;
+  const url = chains.hardhat.rpcUrls.default.http[0];
+  debugger;
+  return createWalletClient({
+    account,
+    chain: chains.hardhat,
+    transport: http(url),
+  });
+}
+const mockViemZkvSigner = createWalletClientFromPrivateKey(zkvSignerPrivateKey);
+
 const config = createCofhesdkConfig({
   supportedChains: [],
+  _internal: {
+    zkvWalletClient: mockViemZkvSigner,
+  },
 });
 export const cofhesdkClient = createCofhesdkClient(config);
 
