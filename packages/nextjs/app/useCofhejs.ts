@@ -35,10 +35,10 @@ const config = createCofhesdkConfig({
   mocks: {
     sealOutputDelay: 1000,
   },
-  // Hard coded signer for submitting encrypted inputs
-  // This is only used in the mock environment to submit the mock encrypted inputs so that they can be used in FHE ops.
-  // This has no effect in the mainnet or testnet environments.
   _internal: {
+    // Hard coded signer for submitting encrypted inputs
+    // This is only used in the mock environment to submit the mock encrypted inputs so that they can be used in FHE ops.
+    // This has no effect in the mainnet or testnet environments.
     zkvWalletClient: mockViemZkvSigner,
   },
 });
@@ -80,11 +80,6 @@ export function useInitializeCofhejs() {
       logBlockStart("useInitializeCofhejs");
       logBlockMessage("INITIALIZING     | Setting up CoFHE environment");
 
-      // const chainId = publicClient?.chain.id;
-      // const environment = ChainEnvironments[chainId as keyof typeof ChainEnvironments] ?? "TESTNET";
-
-      // const viemZkvSigner = createWalletClientFromPrivateKey(publicClient, zkvSignerPrivateKey);
-
       try {
         // TODO: are there any more async initialization results we need to wait for?
 
@@ -111,15 +106,6 @@ export function useInitializeCofhejs() {
     initializeCofhejs();
   }, [walletClient, publicClient, isChainSupported]);
 }
-
-// type CofhejsStoreState = ReturnType<typeof cofhejs.store.getState>;
-
-/**
- * Hook to access the cofhejs store state (used internally)
- * @param selector Function to select specific state from the store
- * @returns Selected state from the cofhejs store
- */
-// const useCofhejsStore = <T>(selector: (state: CofhejsStoreState) => T) => useStore(cofhejs.store, selector);
 
 /**
  * Hook to get the current account initialized in cofhejs
@@ -270,13 +256,10 @@ export const useCofhejsCreatePermit = () => {
         throw new Error("Invalid permit type");
       }
       const permitResult = await getPermitResult();
-
       if (permitResult.success) {
         notification.success("Permit created");
       } else {
-        notification.error(
-          "tried creating permit. Ran into error: " + (permitResult.error.message ?? String(permitResult.error)),
-        );
+        notification.error(permitResult.error.message ?? String(permitResult.error));
       }
       return permitResult;
     },

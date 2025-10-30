@@ -9,8 +9,8 @@ import {
   EncryptableUint16,
   EncryptableUint32,
   EncryptableUint64,
-  EncryptableUint128, // EncryptableUint256,
-  FheTypes, // cofhejs,
+  EncryptableUint128,
+  FheTypes,
 } from "@cofhe/sdk";
 import {
   encryptedValueToString,
@@ -38,9 +38,7 @@ type EncryptableFromFheTypes<T extends FheTypes> = T extends FheTypes.Bool
           : T extends FheTypes.Uint128
             ? EncryptableUint128
             : T extends FheTypes.Uint256
-              ? // ? EncryptableUint256
-                // : T extends FheTypes.Uint160
-                EncryptableAddress
+              ? EncryptableAddress
               : never;
 
 /**
@@ -73,8 +71,6 @@ const fheTypeToEncryptable = <T extends FheTypes>(
       return Encryptable.uint64(value as string | bigint) as EncryptableFromFheTypes<T>;
     case FheTypes.Uint128:
       return Encryptable.uint128(value as string | bigint) as EncryptableFromFheTypes<T>;
-    // case FheTypes.Uint256:
-    //   return Encryptable.uint(value as string | bigint) as EncryptableFromFheTypes<T>;
     case FheTypes.Uint160:
       return Encryptable.address(value as string | bigint) as EncryptableFromFheTypes<T>;
     default:

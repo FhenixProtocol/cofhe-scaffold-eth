@@ -47,11 +47,7 @@ export type DecryptionResult<T extends FheTypes> =
       state: "error";
     };
 
-const _decryptValue = async <T extends FheTypes>(
-  fheType: T,
-  value: bigint,
-  // address: string,
-): Promise<DecryptionResult<T>> => {
+const _decryptValue = async <T extends FheTypes>(fheType: T, value: bigint): Promise<DecryptionResult<T>> => {
   logBlockStart("useDecrypt - _decryptValue");
   logBlockMessage(`DECRYPTING VALUE | ${encryptedValueToString(fheType, value)}`);
 
@@ -176,11 +172,7 @@ export const useDecryptValue = <T extends FheTypes>(
       state: "pending",
     });
     try {
-      const result = await _decryptValue(
-        fheType,
-        ctHash,
-        // , cofhejsAccount
-      );
+      const result = await _decryptValue(fheType, ctHash);
       setResult(result);
     } catch (error) {
       setResult({
