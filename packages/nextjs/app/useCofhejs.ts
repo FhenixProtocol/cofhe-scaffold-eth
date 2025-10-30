@@ -35,6 +35,9 @@ const config = createCofhesdkConfig({
   mocks: {
     sealOutputDelay: 1000,
   },
+  // Hard coded signer for submitting encrypted inputs
+  // This is only used in the mock environment to submit the mock encrypted inputs so that they can be used in FHE ops.
+  // This has no effect in the mainnet or testnet environments.
   _internal: {
     zkvWalletClient: mockViemZkvSigner,
   },
@@ -89,22 +92,6 @@ export function useInitializeCofhejs() {
         handleResult("connectionResult", connectionResult);
         const initializationResult = await cofhesdkClient.initializationResults.keyFetchResult;
         handleResult("initializationResult", initializationResult);
-        // const initializationResult = await cf.initializeWithViem({
-        //   viemClient: publicClient,
-        //   viemWalletClient: walletClient,
-        //   environment,
-        //   // Whether to generate a permit for the connected account during the initialization process
-        //   // Recommended to set to false, and then call `cofhejs.generatePermit()` when the user is ready to generate a permit
-        //   // !! if **true** - will generate a permit immediately on page load !!
-        //   generatePermit: false,
-        //   // Hard coded signer for submitting encrypted inputs
-        //   // This is only used in the mock environment to submit the mock encrypted inputs so that they can be used in FHE ops.
-        //   // This has no effect in the mainnet or testnet environments.
-        //   mockConfig: {
-        //     decryptDelay: 1000,
-        //     zkvSigner: viemZkvSigner,
-        //   },
-        // });
 
         notification.success("Cofhe initialized successfully");
         function handleResult<T>(prefix: string, result: Result<T>) {
