@@ -1,5 +1,6 @@
-import { useCallback, useMemo } from "react";
-import { useEffect } from "react";
+"use client";
+
+import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 import { Result } from "@cofhe/sdk";
 import {
   CreateSelfPermitOptions,
@@ -43,6 +44,29 @@ const config = createCofhesdkConfig({
   },
 });
 export const cofhesdkClient = createCofhesdkClient(config);
+
+// sync core store
+const subscribeToConnection = (onStoreChange: () => void) => {
+  return cofhesdkClient.subscribe(() => {
+    onStoreChange();
+  });
+};
+const getConnectionSnapshot = () => cofhesdkClient.getSnapshot();
+
+const useCofhejsConnectionSnapshot = () =>
+  useSyncExternalStore(subscribeToConnection, getConnectionSnapshot, getConnectionSnapshot);
+// sync permits store
+type PermitsSnapshot = ReturnType<(typeof cofhesdkClient.permits)["getSnapshot"]>;
+const subscribeToPermits = (onStoreChange: () => void) => {
+  return cofhesdkClient.permits.subscribe(() => {
+    onStoreChange();
+  });
+};
+
+const getPermitsSnapshot = () => cofhesdkClient.permits.getSnapshot();
+
+const useCofhejsPermitsSnapshot = (): PermitsSnapshot =>
+  useSyncExternalStore(subscribeToPermits, getPermitsSnapshot, getPermitsSnapshot);
 
 /**
  * Hook to check if the currently connected chain is supported by the application
@@ -112,7 +136,7 @@ export function useInitializeCofhejs() {
  * @returns The current account address or undefined
  */
 export const useCofhejsAccount = () => {
-  return cofhesdkClient.getSnapshot().account;
+  return useCofhejsConnectionSnapshot().account;
 };
 
 /**
@@ -120,7 +144,7 @@ export const useCofhejsAccount = () => {
  * @returns The current chain ID or undefined
  */
 export const useCofhejsChainId = () => {
-  return cofhesdkClient.getSnapshot().chainId;
+  return useCofhejsConnectionSnapshot().chainId;
 };
 
 /**
@@ -133,8 +157,9 @@ export const useCofhejsInitialized = () => {
   // const fheKeysInitialized = cofhesdkClient.initializationResults.keyFetchResult;
   // const providerInitialized = cofhesdkClient.connected;
   // const signerInitialized = cofhesdkClient.getSnapshot().signerInitialized;
-
-  return cofhesdkClient.connected;
+  const { connected } = useCofhejsConnectionSnapshot();
+  console.log("useCofhejsInitialized / cofhesdkClient.connected", connected);
+  return connected;
 };
 
 /**
@@ -143,11 +168,8 @@ export const useCofhejsInitialized = () => {
  * Refreshes when any of the underlying values change
  */
 export const useCofhejsStatus = () => {
-  const chainId = useCofhejsChainId();
-  const account = useCofhejsAccount();
-  const initialized = useCofhejsInitialized();
-
-  return useMemo(() => ({ chainId, account, initialized }), [chainId, account, initialized]);
+  const { chainId, account, connected } = useCofhejsConnectionSnapshot();
+  return useMemo(() => ({ chainId, account, initialized: connected }), [chainId, account, connected]);
 };
 
 // Permit Modal
@@ -177,8 +199,9 @@ export const useCofhejsModalStore = create<CofhejsPermitModalStore>(set => ({
  */
 export const useCofhejsActivePermitHash = () => {
   const { chainId, account, initialized } = useCofhejsStatus();
+  const permitsSnapshot = useCofhejsPermitsSnapshot();
   if (!initialized || !chainId || !account) return undefined;
-  return cofhesdkClient.permits.getSnapshot().activePermitHash?.[chainId]?.[account];
+  return permitsSnapshot.activePermitHash?.[chainId]?.[account];
 };
 
 /**
@@ -189,12 +212,13 @@ export const useCofhejsActivePermitHash = () => {
 export const useCofhejsActivePermit = (): Permit | null => {
   const { chainId, account, initialized } = useCofhejsStatus();
   const activePermitHash = useCofhejsActivePermitHash();
+  const permitsSnapshot = useCofhejsPermitsSnapshot();
   return useMemo(() => {
     if (!initialized || !chainId || !account || !activePermitHash) return null;
-    const serializedPermit = cofhesdkClient.permits.getSnapshot().permits[chainId][account][activePermitHash] || null;
+    const serializedPermit = permitsSnapshot.permits?.[chainId]?.[account]?.[activePermitHash] ?? null;
     const permit = serializedPermit ? PermitUtils.deserialize(serializedPermit) : null;
     return permit;
-  }, [activePermitHash, chainId, account, initialized]);
+  }, [activePermitHash, chainId, account, initialized, permitsSnapshot]);
 };
 
 /**
@@ -218,12 +242,13 @@ export const useCofhejsIsActivePermitValid = () => {
  */
 export const useCofhejsAllPermitHashes = () => {
   const { chainId, account, initialized } = useCofhejsStatus();
+  const permitsSnapshot = useCofhejsPermitsSnapshot();
   return useMemo(() => {
     if (!initialized || !chainId || !account) return [];
-    const permitsForAccount = cofhesdkClient.permits.getSnapshot().permits[chainId]?.[account];
+    const permitsForAccount = permitsSnapshot.permits?.[chainId]?.[account];
     if (!permitsForAccount) return [];
     return Object.keys(permitsForAccount);
-  }, [chainId, account, initialized]);
+  }, [chainId, account, initialized, permitsSnapshot]);
 };
 
 /**
@@ -233,8 +258,9 @@ export const useCofhejsAllPermitHashes = () => {
  */
 export const useCofhejsAllPermits = (): Permit[] => {
   const { chainId, account, initialized } = useCofhejsStatus();
+  const permitsSnapshot = useCofhejsPermitsSnapshot();
   if (!initialized || !chainId || !account) return [];
-  return Object.values(cofhesdkClient.permits.getSnapshot().permits[chainId][account] || {})
+  return Object.values(permitsSnapshot.permits?.[chainId]?.[account] || {})
     .map(serializedPermit => (serializedPermit ? PermitUtils.deserialize(serializedPermit) : null))
     .filter((permit): permit is Permit => permit !== null);
 };
