@@ -10,7 +10,7 @@ import { WagmiProvider } from "wagmi";
 import { useInitializeCofhe } from "~~/app/useCofhe";
 import { Footer } from "~~/components/Footer";
 import { Header } from "~~/components/Header";
-import { CofhePermitModal } from "~~/components/cofhe/CofhejsPermitModal";
+import { CofhePermitModal } from "~~/components/cofhe/CofhePermitModal";
 import { BlockieAvatar } from "~~/components/scaffold-eth";
 import { useInitializeNativeCurrencyPrice } from "~~/hooks/scaffold-eth";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
