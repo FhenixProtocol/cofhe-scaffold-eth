@@ -6,7 +6,8 @@ import {
   useCofhejsActivePermit,
   useCofhejsAllPermits,
   useCofhejsModalStore,
-  useCofhejsRemovePermit, // useCofhejsSetActivePermit,
+  useCofhejsRemovePermit,
+  useCofhejsSetActivePermit, // useCofhejsSetActivePermit,
   useCofhejsStatus,
 } from "~~/app/useCofhejs";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
@@ -157,14 +158,14 @@ const AllPermitsList = () => {
 const PermitItem = ({
   permit,
   isActive,
-  // onRemove,
+  onRemove,
 }: {
   permit: Permit;
   isActive: boolean;
   onRemove: (hash: string) => void;
 }) => {
-  // const setActivePermit = useCofhejsSetActivePermit();
-  const hash = "123213213"; // permit.getHash();
+  const setActivePermit = useCofhejsSetActivePermit();
+  const hash = PermitUtils.getHash(permit);
 
   return (
     <div className="flex flex-col bg-base-300/30 p-2 rounded-lg">
@@ -191,15 +192,12 @@ const PermitItem = ({
       />
       {!isActive && (
         <div className="flex justify-start gap-2 mt-2">
-          <div
-            className="btn btn-xs btn-cofhe"
-            // onClick={() => setActivePermit(permit.getHash())}
-          >
+          <div className="btn btn-xs btn-cofhe" onClick={() => setActivePermit(hash)}>
             Use
           </div>
           <div
             className="btn btn-ghost btn-xs text-error hover:text-error hover:bg-error/10"
-            // onClick={() => onRemove(permit.getHash())}
+            onClick={() => onRemove(hash)}
             title="Remove permit"
           >
             Delete
