@@ -37,12 +37,12 @@ yarn start
 - Hardhat
 
   - `@fhenixprotocol/cofhe-contracts` - Package containing `FHE.sol`. `FHE.sol` is a library that exposes FHE arithmetic operations like `FHE.add` and `FHE.mul` along with access control functions.
-  - `@fhenixprotocol/cofhe-mock-contracts` - The CoFHE coprocessor exists off-chain. `cofhe-mock-contracts` are a fully on-chain drop in replacement for the off-chain components. These mocks allow better developer and testing experience when working with FHE.
-  - `cofhe-hardhat-plugin` - A hardhat plugin responsible for deploying the mock contracts on the hardhat network and during tests. Also exposes testing utility functions in `hre.cofhe.___`.
-  - `cofhejs` - Primary connection to the CoFHE coprocessor. Exposes functions like `encrypt` and `unseal`. Manages access permits. Automatically plays nicely with the mock environment.
+  - `@cofhe/mock-contracts` - The CoFHE coprocessor exists off-chain. `@cofhe/mock-contracts` are a fully on-chain drop-in replacement for the off-chain components. These mocks allow better developer and testing experience when working with FHE. Is transparently used as a dependency of `@cofhe/hardhat-plugin`
+  - `@cofhe/hardhat-plugin` - A hardhat plugin responsible for deploying the mock contracts on the hardhat network and during tests. Also exposes testing utility functions in `hre.cofhesdk.___`.
+  - `@cofhe/sdk` - Primary connection to the CoFHE coprocessor. Exposes functions like `encryptInputs` (for sealing) and `decryptHandle` (for unsealing). Manages access permits. Automatically plays nicely with the mock environment.
 
 - Nextjs
-  - `cofhejs` - Primary connection to the CoFHE coprocessor. Exposes functions like `encrypt` and `unseal`. Manages access permits. Automatically plays nicely with the mock environment.
+  - `@cofhe/sdk` - Primary connection to the CoFHE coprocessor. Exposes functions like `encryptInputs` (for sealing) and `decryptHandle` (for unsealing). Manages access permits. Automatically plays nicely with the mock environment.
 
 ## Working with FHE Smart Contracts
 
@@ -151,7 +151,7 @@ Key concepts in FHE contract development:
 
 ### Testing your FHE Contract
 
-The [`FHECounter.test.ts`](packages/hardhat/test/FHECounter.test.ts) file demonstrates testing FHE contracts using the mock environment. Before using `cofhejs.encrypt` to prepare input variables, or `cofhejs.unseal` to read encrypted data, cofhejs must be initialized. In a hardhat environment there is an exposed utility function:
+The [`FHECounter.test.ts`](packages/hardhat/test/FHECounter.test.ts) file demonstrates testing FHE contracts using the mock environment. Before using `cofhesdkClient.encryptInput` to prepare input variables, or `cofhesdkClient.decryptHandle` to read encrypted data, cofhe must be initialized. In a hardhat environment there is an exposed utility function:
 
 ```typescript
 const [bob] = await hre.ethers.getSigners()
