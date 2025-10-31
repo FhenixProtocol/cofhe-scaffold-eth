@@ -155,76 +155,74 @@ The [`FHECounter.test.ts`](packages/hardhat/test/FHECounter.test.ts) file demons
 
 ```typescript
 const [bob] = await hre.ethers.getSigners()
-//     ^? HardhatEthersSigner
 
-// `hre.cofhe.initializeWithHardhatSigner` is used to initialize FHE with a Hardhat signer
-// Initialization is required before any `cofhejs.unseal` or `cofhejs.encrypt` operations can be performed
-// `initializeWithHardhatSigner` is a helper function that initializes FHE with a Hardhat signer
+// `hre.cofhesdk.createBatteriesIncludedCofhesdkClient` is used to initialize FHE with a Hardhat signer
+// Initialization is required before any `encrypt` or `decrypt` operations can be performed
+// `createBatteriesIncludedCofhesdkClient` is a helper function that initializes FHE with a Hardhat signer
 // It returns a `Promise<Result<>>` type.
 
 // The `Result<T>` type looks like this:
 // {
 //   success: boolean,
 //   data: T (Permit | undefined in the case of initializeWithHardhatSigner),
-//   error: CofhejsError | null,
+//   error: CofhesdkError | null,
 // }
-const initializeResult = await hre.cofhe.initializeWithHardhatSigner(bob)
+const client = await hre.cofhesdk.createBatteriesIncludedCofhesdkClient(bob);
 
-// `hre.cofhe.expectResultSuccess` is used to verify that the `Result` is successful (success: true)
+// `hre.cofhesdk.expectResultSuccess` is used to verify that the `Result` is successful (success: true)
 // If the `Result` is not successful, the test will fail
-await hre.cofhe.expectResultSuccess(initializeResult)
+await hre.cofhesdk.expectResultSuccess(client.initializationResults.keyFetchResult);
 ```
 
 To verify the value of an encrypted variable, we can use:
 
 ```typescript
 // Get the encrypted count variable
-const count = await counter.count()
+const count = await counter.count();
 
-// `hre.cofhe.mocks.expectPlaintext` is used to verify that the encrypted count is 0
+// `hre.cofhesdk.mocks.expectPlaintext` is used to verify that the encrypted value is 0
 // This uses the encrypted variable `count` and retrieves the plaintext value from the on-chain mock contracts
 // This kind of test can only be done in a mock environment where the plaintext value is known
-await hre.cofhe.mocks.expectPlaintext(count, 0n)
+await hre.cofhesdk.mocks.expectPlaintext(count, 0n);
 ```
 
-To read the encrypted variable directly, we can use `cofhejs.unseal`:
+To read the encrypted variable directly, we can use `cofhesdkClient.decryptHandle`:
 
 ```typescript
-const count = await counter.count()
+const count = await counter.count();
 
-// `cofhejs.unseal` is used to unseal the encrypted value
-// cofhejs must be initialized before `unseal` can be called
-// `FheType.Uint32` tells `unseal` the type of the encrypted variable
-const unsealedResult = await cofhejs.unseal(count, FheTypes.Uint32)
+// `decryptHandle` is used to unseal the encrypted value
+// the client must be initialized before `unseal` can be called
+const unsealedResult = await client.decryptHandle(count, FheTypes.Uint32).decrypt();
 ```
 
-To encrypt a variable for use as an `InEuint*` we can use `cofhejs.encrypt`:
+To encrypt a variable for use as an `InEuint*` we can use `cofhesdkClient.encryptInputs`:
 
 ```typescript
-// `cofhejs.encrypt` is used to encrypt the value
-// cofhejs must be initialized before `encrypt` can be called
-// This accepts an array of values to be encrypted, using the `Encryptable` type from `cofhejs`
-const encryptResult = await cofhejs.encrypt([Encryptable.uint32(5n)] as const)
-const [encryptedInput] = await hre.cofhe.expectResultSuccess(encryptResult)
+// `encryptInputs` is used to encrypt the value
+// the client must be initialized before `encryptInputs` can be called
+const encryptResult = await client.encryptInputs([Encryptable.uint32(5n)]).encrypt();
 
-await counter.connect(bob).set(encryptedInput)
+const [encryptedInput] = await hre.cofhesdk.expectResultSuccess(encryptResult);
+await hre.cofhesdk.mocks.expectPlaintext(encryptedInput.ctHash, 5n);
 
-// Check that the count was updated correctly
-const count = await counter.count()
-await hre.cofhe.mocks.expectPlaintext(count, 5n)
+await counter.connect(bob).set(encryptedInput);
+
+const count = await counter.count();
+await hre.cofhesdk.mocks.expectPlaintext(count, 5n);
 ```
 
 When global logging is needed we can use the utilities:
 
 ```typescript
-hre.cofhe.mocks.enableLogs()
-hre.cofhe.mocks.disableLogs()
+hre.cofhesdk.mocks.enableLogs()
+hre.cofhesdk.mocks.disableLogs()
 ```
 
 or we can use targeted logging like this:
 
 ```typescript
-await hre.cofhe.mocks.withLogs('counter.increment()', async () => {
+await hre.cofhesdk.mocks.withLogs('counter.increment()', async () => {
 	await counter.connect(bob).increment()
 })
 ```

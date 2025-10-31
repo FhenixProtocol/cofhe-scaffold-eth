@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 import { Result } from "@cofhe/sdk";
+import { hardhat } from "@cofhe/sdk/chains";
 import {
   CreateSelfPermitOptions,
   CreateSharingPermitOptions,
@@ -32,7 +33,7 @@ function createWalletClientFromPrivateKey(privateKey: `0x${string}`): WalletClie
 const mockViemZkvSigner = createWalletClientFromPrivateKey(zkvSignerPrivateKey);
 
 const config = createCofhesdkConfig({
-  supportedChains: [],
+  supportedChains: [hardhat],
   mocks: {
     sealOutputDelay: 1000,
   },
