@@ -271,13 +271,13 @@ This hook handles the complete setup of the CoFHE system, including environment 
 
 ### CoFHE Portal
 
-The [`CofhejsPortal`](packages/nextjs/components/cofhe/CofhejsPortal.tsx) component provides a dropdown interface for managing CoFHE permits and viewing system status. It's integrated into the [`Header`](packages/nextjs/components/Header.tsx) component as a shield icon button:
+The [`CofhePortal`](packages/nextjs/components/cofhe/CofhePortal.tsx) component provides a dropdown interface for managing CoFHE permits and viewing system status. It's integrated into the [`Header`](packages/nextjs/components/Header.tsx) component as a shield icon button:
 
 ```typescript
 /**
  * CoFHE Portal Integration
  *
- * The CofhejsPortal component is integrated into the header to provide easy access to
+ * The CofhePortal component is integrated into the header to provide easy access to
  * CoFHE permit management functionality. It appears as a shield icon button that opens
  * a dropdown menu containing:
  * - System initialization status
@@ -287,7 +287,7 @@ The [`CofhejsPortal`](packages/nextjs/components/cofhe/CofhejsPortal.tsx) compon
  * This placement ensures the portal is always accessible while using the application,
  * allowing users to manage their permits and monitor system status from any page.
  */
-<CofhejsPortal />
+<CofhePortal />
 ```
 
 The portal displays:
@@ -330,19 +330,19 @@ The [`FHECounterComponent`](packages/nextjs/app/FHECounterComponent.tsx) demonst
  *
  * Demonstrates the process of encrypting user input before sending it to the blockchain:
  * 1. User enters a number in the input field
- * 2. When "Set" is clicked, the number is encrypted using cofhejs
+ * 2. When "Set" is clicked, the number is encrypted using cofhe SDK
  * 3. The encrypted value is then sent to the smart contract
  *
  * This ensures the actual value is never exposed on the blockchain,
  * maintaining privacy while still allowing computations.
  */
-const encryptedResult = await cofhejs.encrypt([Encryptable.uint32(input)])
-// cofhejs.encrypt returns a result object with success status and data/error
+const encryptedResult = await cofhesdkClient.encryptInputs([encryptable]).encrypt();
+// encryptedResult is a result object with success status and data/error
 ```
 
 ### Permit Modal
 
-The [`CofhejsPermitModal`](packages/nextjs/components/cofhe/CofhejsPermitModal.tsx) allows users to generate cryptographic permits for accessing encrypted data. This modal automatically opens when a user attempts to decrypt a value in the `EncryptedValue` component without a valid permit:
+The [`CofhePermitModal`](packages/nextjs/components/cofhe/CofhePermitModal.tsx) allows users to generate cryptographic permits for accessing encrypted data. This modal automatically opens when a user attempts to decrypt a value in the `EncryptedValue` component without a valid permit:
 
 ```typescript
 /**
