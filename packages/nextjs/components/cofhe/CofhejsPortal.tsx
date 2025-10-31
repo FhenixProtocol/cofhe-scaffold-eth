@@ -3,12 +3,12 @@ import { Permit, PermitUtils } from "@cofhe/sdk/permits";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { ShieldCheckIcon } from "@heroicons/react/24/solid";
 import {
-  useCofhejsActivePermit,
-  useCofhejsAllPermits,
-  useCofhejsModalStore,
-  useCofhejsRemovePermit,
-  useCofhejsSetActivePermit, // useCofhejsSetActivePermit,
-  useCofhejsStatus,
+  useCofheActivePermit,
+  useCofheAllPermits,
+  useCofheModalStore,
+  useCofheRemovePermit,
+  useCofheSetActivePermit,
+  useCofheStatus,
 } from "~~/app/useCofhejs";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
 import scaffoldConfig from "~~/scaffold.config";
@@ -27,13 +27,13 @@ import scaffoldConfig from "~~/scaffold.config";
  * The portal is accessible through a shield icon button in the UI, which opens a dropdown
  * containing all permit management functionality and system status information.
  */
-export const CofhejsPortal = () => {
-  const { chainId, account, initialized } = useCofhejsStatus();
+export const CofhePortal = () => {
+  const { chainId, account, initialized } = useCofheStatus();
   const dropdownRef = useRef<HTMLDetailsElement>(null);
-  const activePermit = useCofhejsActivePermit();
+  const activePermit = useCofheActivePermit();
 
-  const setGeneratePermitModalOpen = useCofhejsModalStore(state => state.setGeneratePermitModalOpen);
-  const removePermit = useCofhejsRemovePermit();
+  const setGeneratePermitModalOpen = useCofheModalStore(state => state.setGeneratePermitModalOpen);
+  const removePermit = useCofheRemovePermit();
 
   const closeDropdown = () => {
     dropdownRef.current?.removeAttribute("open");
@@ -120,9 +120,9 @@ const InfoRow = ({
  * Shows a placeholder message when no permits are available.
  */
 const AllPermitsList = () => {
-  const activePermit = useCofhejsActivePermit();
-  const allPermits = useCofhejsAllPermits();
-  const removePermit = useCofhejsRemovePermit();
+  const activePermit = useCofheActivePermit();
+  const allPermits = useCofheAllPermits();
+  const removePermit = useCofheRemovePermit();
 
   if (allPermits.length === 0) {
     return (
@@ -164,7 +164,7 @@ const PermitItem = ({
   isActive: boolean;
   onRemove: (hash: string) => void;
 }) => {
-  const setActivePermit = useCofhejsSetActivePermit();
+  const setActivePermit = useCofheSetActivePermit();
   const hash = PermitUtils.getHash(permit);
 
   return (

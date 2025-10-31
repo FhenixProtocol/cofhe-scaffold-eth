@@ -4,7 +4,7 @@ import React, { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CofhejsPortal } from "./cofhe/CofhejsPortal";
+import { CofhePortal } from "./cofhe/CofhejsPortal";
 import { hardhat } from "viem/chains";
 import { Bars3Icon, BugAntIcon } from "@heroicons/react/24/outline";
 import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
@@ -103,7 +103,7 @@ export const Header = () => {
         {/*
          * CoFHE Portal Integration
          *
-         * The CofhejsPortal component is integrated into the header to provide easy access to
+         * The CofhePortal component is integrated into the header to provide easy access to
          * CoFHE permit management functionality. It appears as a shield icon button that opens
          * a dropdown menu containing:
          * - System initialization status
@@ -113,7 +113,7 @@ export const Header = () => {
          * This placement ensures the portal is always accessible while using the application,
          * allowing users to manage their permits and monitor system status from any page.
          */}
-        <CofhejsPortal />
+        <CofhePortal />
       </div>
     </div>
   );

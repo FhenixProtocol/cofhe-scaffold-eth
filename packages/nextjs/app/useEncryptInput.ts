@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { cofhesdkClient, useCofhejsInitialized } from "./useCofhejs";
+import { cofhesdkClient, useCofheInitialized } from "./useCofhejs";
 import {
   Encryptable,
   EncryptableAddress,
@@ -84,7 +84,7 @@ const fheTypeToEncryptable = <T extends FheTypes>(
  * @returns An object containing:
  *   - onEncryptInput: A function to encrypt input values
  *   - isEncryptingInput: A boolean indicating if encryption is in progress
- *   - inputEncryptionDisabled: A boolean indicating if encryption is disabled (when cofhejs is not initialized)
+ *   - inputEncryptionDisabled: A boolean indicating if encryption is disabled (when cofhe is not initialized)
  *
  * @example
  * ```typescript
@@ -99,7 +99,7 @@ const fheTypeToEncryptable = <T extends FheTypes>(
  */
 export const useEncryptInput = () => {
   const [isEncryptingInput, setIsEncryptingInput] = useState(false);
-  const initialized = useCofhejsInitialized();
+  const initialized = useCofheInitialized();
 
   const onEncryptInput = useCallback(
     async <T extends FheTypes, E extends EncryptableInput<T>>(fheType: T, value: E) => {

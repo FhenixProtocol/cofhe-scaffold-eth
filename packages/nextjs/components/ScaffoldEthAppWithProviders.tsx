@@ -7,10 +7,10 @@ import { AppProgressBar as ProgressBar } from "next-nprogress-bar";
 import { useTheme } from "next-themes";
 import { Toaster } from "react-hot-toast";
 import { WagmiProvider } from "wagmi";
-import { useInitializeCofhejs } from "~~/app/useCofhejs";
+import { useInitializeCofhe } from "~~/app/useCofhejs";
 import { Footer } from "~~/components/Footer";
 import { Header } from "~~/components/Header";
-import { CofhejsPermitModal } from "~~/components/cofhe/CofhejsPermitModal";
+import { CofhePermitModal } from "~~/components/cofhe/CofhejsPermitModal";
 import { BlockieAvatar } from "~~/components/scaffold-eth";
 import { useInitializeNativeCurrencyPrice } from "~~/hooks/scaffold-eth";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
@@ -21,7 +21,7 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   /**
    * CoFHE Initialization
    *
-   * The useInitializeCofhejs hook initializes the CoFHE system with the connected wallet and chain configuration.
+   * The useInitializeCofhe hook initializes the CoFHE system with the connected wallet and chain configuration.
    * It performs the following key functions:
    * - Sets up the FHE environment based on the current network (MAINNET, TESTNET, or MOCK)
    * - Initializes the FHE keys, provider, and signer
@@ -32,7 +32,7 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
    * throughout the application. It automatically refreshes when the connected wallet
    * or chain changes to maintain proper configuration.
    */
-  useInitializeCofhejs();
+  useInitializeCofhe();
 
   return (
     <>
@@ -42,7 +42,7 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
         <Footer />
       </div>
       <Toaster />
-      <CofhejsPermitModal />
+      <CofhePermitModal />
     </>
   );
 };

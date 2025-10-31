@@ -40,7 +40,7 @@ export const FHECounterComponent = () => {
  *
  * Demonstrates the process of encrypting user input before sending it to the blockchain:
  * 1. User enters a number in the input field
- * 2. When "Set" is clicked, the number is encrypted using cofhejs
+ * 2. When "Set" is clicked, the number is encrypted using CoFHE SDK
  * 3. The encrypted value is then sent to the smart contract
  *
  * This ensures the actual value is never exposed on the blockchain,

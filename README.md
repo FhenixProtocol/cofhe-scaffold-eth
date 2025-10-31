@@ -247,13 +247,13 @@ which will result in logs like this:
 
 ### Initialization
 
-The frontend initialization begins in [`ScaffoldEthAppWithProviders.tsx`](packages/nextjs/components/ScaffoldEthAppWithProviders.tsx) where the `useInitializeCofhejs` hook is called:
+The frontend initialization begins in [`ScaffoldEthAppWithProviders.tsx`](packages/nextjs/components/ScaffoldEthAppWithProviders.tsx) where the `useInitializeCofhe` hook is called:
 
 ```typescript
 /**
  * CoFHE Initialization
  *
- * The useInitializeCofhejs hook initializes the CoFHE system with the connected wallet and chain configuration.
+ * The useInitializeCofhe hook initializes the CoFHE system with the connected wallet and chain configuration.
  * It performs the following key functions:
  * - Sets up the FHE environment based on the current network (MAINNET, TESTNET, or MOCK)
  * - Initializes the FHE keys, provider, and signer
@@ -264,7 +264,7 @@ The frontend initialization begins in [`ScaffoldEthAppWithProviders.tsx`](packag
  * throughout the application. It automatically refreshes when the connected wallet
  * or chain changes to maintain proper configuration.
  */
-useInitializeCofhejs()
+useInitializeCofhe()
 ```
 
 This hook handles the complete setup of the CoFHE system, including environment detection, wallet client configuration, and permit management initialization. It runs automatically when the wallet or chain changes, ensuring the FHE system stays properly configured.
@@ -385,34 +385,34 @@ The [`EncryptedValueCard`](packages/nextjs/components/scaffold-eth/EncryptedValu
 - Provides a visual wrapper with gradient borders to indicate encrypted content
 - Includes a shield icon to clearly mark encrypted data areas
 
-#### useCofhejs Hooks
+#### useCofhe Hooks
 
-The [`useCofhejs.ts`](packages/nextjs/app/useCofhejs.ts) file provides comprehensive React hooks for FHE operations:
+The [`useCofhe.ts`](packages/nextjs/app/useCofhe.ts) file provides comprehensive React hooks for FHE operations:
 
 **Initialization Hooks**:
 
 ```typescript
-// Hook to initialize cofhejs with the connected wallet and chain configuration
+// Hook to initialize cofhe with the connected wallet and chain configuration
 // Handles initialization errors and displays toast notifications on success or error
 // Refreshes when connected wallet or chain changes
-useInitializeCofhejs()
+useInitializeCofhe()
 
-// Hook to check if cofhejs is fully initialized (FHE keys, provider, and signer)
+// Hook to check if cofhe is fully initialized (FHE keys, provider, and signer)
 // This is used to determine if the user is ready to use the FHE library
 // FHE based interactions (encrypt / decrypt) should be disabled until this is true
-useCofhejsInitialized()
+useCofheInitialized()
 
-// Hook to get the current account initialized in cofhejs
-useCofhejsAccount()
+// Hook to get the current account initialized in cofhe
+useCofheAccount()
 ```
 
 **Status Hooks**:
 
 ```typescript
-// Hook to get the complete status of cofhejs
+// Hook to get the complete status of cofhe
 // Returns Object containing chainId, account, and initialization status
 // Refreshes when any of the underlying values change
-useCofhejsStatus()
+useCofheStatus()
 
 // Hook to check if the currently connected chain is supported by the application
 // Returns boolean indicating if the current chain is in the target networks list
@@ -426,32 +426,32 @@ useIsConnectedChainSupported()
 // Hook to create a new permit
 // Returns Async function to create a permit with optional options
 // Refreshes when chainId, account, or initialization status changes
-useCofhejsCreatePermit()
+useCofheCreatePermit()
 
 // Hook to remove a permit
 // Returns Async function to remove a permit by its hash
 // Refreshes when chainId, account, or initialization status changes
-useCofhejsRemovePermit()
+useCofheRemovePermit()
 
 // Hook to select the active permit
 // Returns Async function to set the active permit by its hash
 // Refreshes when chainId, account, or initialization status changes
-useCofhejsSetActivePermit()
+useCofheSetActivePermit()
 
 // Hook to get the active permit object
 // Returns The active permit object or null if not found/valid
 // Refreshes when active permit hash changes
-useCofhejsActivePermit()
+useCofheActivePermit()
 
 // Hook to check if the active permit is valid
 // Returns boolean indicating if the active permit is valid
 // Refreshes when permit changes
-useCofhejsIsActivePermitValid()
+useCofheIsActivePermitValid()
 
 // Hook to get all permit objects for the current chain and account
 // Returns Array of permit objects
 // Refreshes when permit hashes change
-useCofhejsAllPermits()
+useCofheAllPermits()
 ```
 
 #### useDecrypt Hook
@@ -460,7 +460,7 @@ The [`useDecrypt.ts`](packages/nextjs/app/useDecrypt.ts) file provides utilities
 
 ```typescript
 /**
- * Hook to decrypt a value using cofhejs
+ * Hook to decrypt a value using cofhe
  * @param fheType - The type of the value to decrypt
  * @param ctHash - The hash of the encrypted value
  * @returns Object containing a function to decrypt the value and the result of the decryption

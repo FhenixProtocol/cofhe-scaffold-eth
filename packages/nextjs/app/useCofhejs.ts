@@ -53,7 +53,7 @@ const subscribeToConnection = (onStoreChange: () => void) => {
 };
 const getConnectionSnapshot = () => cofhesdkClient.getSnapshot();
 
-const useCofhejsConnectionSnapshot = () =>
+const useCofheConnectionSnapshot = () =>
   useSyncExternalStore(subscribeToConnection, getConnectionSnapshot, getConnectionSnapshot);
 // sync permits store
 type PermitsSnapshot = ReturnType<(typeof cofhesdkClient.permits)["getSnapshot"]>;
@@ -65,7 +65,7 @@ const subscribeToPermits = (onStoreChange: () => void) => {
 
 const getPermitsSnapshot = () => cofhesdkClient.permits.getSnapshot();
 
-const useCofhejsPermitsSnapshot = (): PermitsSnapshot =>
+const useCofhePermitsSnapshot = (): PermitsSnapshot =>
   useSyncExternalStore(subscribeToPermits, getPermitsSnapshot, getPermitsSnapshot);
 
 /**
@@ -82,11 +82,11 @@ export const useIsConnectedChainSupported = () => {
 };
 
 /**
- * Hook to initialize cofhejs with the connected wallet and chain configuration
+ * Hook to initialize cofhe sdk with the connected wallet and chain configuration
  * Handles initialization errors and displays toast notifications on success or error
  * Refreshes when connected wallet or chain changes
  */
-export function useInitializeCofhejs() {
+export function useInitializeCofhe() {
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
   const isChainSupported = useIsConnectedChainSupported();
@@ -97,11 +97,11 @@ export function useInitializeCofhejs() {
   };
 
   useEffect(() => {
-    const initializeCofhejs = async () => {
+    const initializeCofhe = async () => {
       // Early exit if any of the required dependencies are missing
       if (!publicClient || !walletClient || !isChainSupported) return;
 
-      logBlockStart("useInitializeCofhejs");
+      logBlockStart("useInitializeCofhe");
       logBlockMessage("INITIALIZING     | Setting up CoFHE environment");
 
       try {
@@ -123,54 +123,46 @@ export function useInitializeCofhejs() {
         }
       } catch (err) {
         logBlockMessageAndEnd(`FAILED           | ${err instanceof Error ? err.message : "Unknown error"}`);
-        handleError(err instanceof Error ? err.message : "Unknown error initializing cofhejs");
+        handleError(err instanceof Error ? err.message : "Unknown error initializing cofhe");
       }
     };
 
-    initializeCofhejs();
+    initializeCofhe();
   }, [walletClient, publicClient, isChainSupported]);
 }
 
 /**
- * Hook to get the current account initialized in cofhejs
+ * Hook to get the current account initialized in cofhe
  * @returns The current account address or undefined
  */
-export const useCofhejsAccount = () => {
-  return useCofhejsConnectionSnapshot().account;
+export const useCofheAccount = () => {
+  return useCofheConnectionSnapshot().account;
 };
 
 /**
- * Hook to get the current chain ID initialized in cofhejs
- * @returns The current chain ID or undefined
- */
-export const useCofhejsChainId = () => {
-  return useCofhejsConnectionSnapshot().chainId;
-};
-
-/**
- * Hook to check if cofhejs is fully initialized (FHE keys, provider, and signer)
+ * Hook to check if cofhe is fully initialized (FHE keys, provider, and signer)
  * This is used to determine if the user is ready to use the FHE library
  * FHE based interactions (encrypt / decrypt) should be disabled until this is true
  * @returns boolean indicating if FHE keys, provider, and signer are all initialized
  */
-export const useCofhejsInitialized = () => {
-  const { connected } = useCofhejsConnectionSnapshot();
+export const useCofheInitialized = () => {
+  const { connected } = useCofheConnectionSnapshot();
   return connected;
 };
 
 /**
- * Hook to get the complete status of cofhejs
+ * Hook to get the complete status of cofhe
  * @returns Object containing chainId, account, and initialization status
  * Refreshes when any of the underlying values change
  */
-export const useCofhejsStatus = () => {
-  const { chainId, account, connected } = useCofhejsConnectionSnapshot();
+export const useCofheStatus = () => {
+  const { chainId, account, connected } = useCofheConnectionSnapshot();
   return useMemo(() => ({ chainId, account, initialized: connected }), [chainId, account, connected]);
 };
 
 // Permit Modal
 
-interface CofhejsPermitModalStore {
+interface CofhePermitModalStore {
   generatePermitModalOpen: boolean;
   generatePermitModalCallback?: () => void;
   setGeneratePermitModalOpen: (open: boolean, callback?: () => void) => void;
@@ -180,7 +172,7 @@ interface CofhejsPermitModalStore {
  * Hook to access the permit modal store
  * @returns Object containing modal state and control functions
  */
-export const useCofhejsModalStore = create<CofhejsPermitModalStore>(set => ({
+export const useCofheModalStore = create<CofhePermitModalStore>(set => ({
   generatePermitModalOpen: false,
   setGeneratePermitModalOpen: (open, callback) =>
     set({ generatePermitModalOpen: open, generatePermitModalCallback: callback }),
@@ -193,9 +185,9 @@ export const useCofhejsModalStore = create<CofhejsPermitModalStore>(set => ({
  * @returns The active permit hash or undefined if not set
  * Refreshes when chainId, account, or initialization status changes
  */
-export const useCofhejsActivePermitHash = () => {
-  const { chainId, account, initialized } = useCofhejsStatus();
-  const permitsSnapshot = useCofhejsPermitsSnapshot();
+export const useCofheActivePermitHash = () => {
+  const { chainId, account, initialized } = useCofheStatus();
+  const permitsSnapshot = useCofhePermitsSnapshot();
   if (!initialized || !chainId || !account) return undefined;
   return permitsSnapshot.activePermitHash?.[chainId]?.[account];
 };
@@ -205,10 +197,10 @@ export const useCofhejsActivePermitHash = () => {
  * @returns The active permit object or null if not found/valid
  * Refreshes when active permit hash changes
  */
-export const useCofhejsActivePermit = (): Permit | null => {
-  const { chainId, account, initialized } = useCofhejsStatus();
-  const activePermitHash = useCofhejsActivePermitHash();
-  const permitsSnapshot = useCofhejsPermitsSnapshot();
+export const useCofheActivePermit = (): Permit | null => {
+  const { chainId, account, initialized } = useCofheStatus();
+  const activePermitHash = useCofheActivePermitHash();
+  const permitsSnapshot = useCofhePermitsSnapshot();
   return useMemo(() => {
     if (!initialized || !chainId || !account || !activePermitHash) return null;
     const serializedPermit = permitsSnapshot.permits?.[chainId]?.[account]?.[activePermitHash] ?? null;
@@ -222,8 +214,8 @@ export const useCofhejsActivePermit = (): Permit | null => {
  * @returns boolean indicating if the active permit is valid
  * Refreshes when permit changes
  */
-export const useCofhejsIsActivePermitValid = () => {
-  const permit = useCofhejsActivePermit();
+export const useCofheIsActivePermitValid = () => {
+  const permit = useCofheActivePermit();
   return useMemo(() => {
     if (!permit) return false;
     const deserializedPermit = PermitUtils.deserialize(permit);
@@ -236,9 +228,9 @@ export const useCofhejsIsActivePermitValid = () => {
  * @returns Array of permit hashes
  * Refreshes when chainId, account, or initialization status changes
  */
-export const useCofhejsAllPermitHashes = () => {
-  const { chainId, account, initialized } = useCofhejsStatus();
-  const permitsSnapshot = useCofhejsPermitsSnapshot();
+export const useCofheAllPermitHashes = () => {
+  const { chainId, account, initialized } = useCofheStatus();
+  const permitsSnapshot = useCofhePermitsSnapshot();
   return useMemo(() => {
     if (!initialized || !chainId || !account) return [];
     const permitsForAccount = permitsSnapshot.permits?.[chainId]?.[account];
@@ -252,9 +244,9 @@ export const useCofhejsAllPermitHashes = () => {
  * @returns Array of permit objects
  * Refreshes when permit hashes change
  */
-export const useCofhejsAllPermits = (): Permit[] => {
-  const { chainId, account, initialized } = useCofhejsStatus();
-  const permitsSnapshot = useCofhejsPermitsSnapshot();
+export const useCofheAllPermits = (): Permit[] => {
+  const { chainId, account, initialized } = useCofheStatus();
+  const permitsSnapshot = useCofhePermitsSnapshot();
   if (!initialized || !chainId || !account) return [];
   return Object.values(permitsSnapshot.permits?.[chainId]?.[account] || {})
     .map(serializedPermit => (serializedPermit ? PermitUtils.deserialize(serializedPermit) : null))
@@ -266,8 +258,8 @@ export const useCofhejsAllPermits = (): Permit[] => {
  * @returns Async function to create a permit with optional options
  * Refreshes when chainId, account, or initialization status changes
  */
-export const useCofhejsCreatePermit = () => {
-  const { chainId, account, initialized } = useCofhejsStatus();
+export const useCofheCreatePermit = () => {
+  const { chainId, account, initialized } = useCofheStatus();
   return useCallback(
     async (opts: CreateSelfPermitOptions | CreateSharingPermitOptions) => {
       if (!initialized || !chainId || !account) return;
@@ -294,8 +286,8 @@ export const useCofhejsCreatePermit = () => {
  * @returns Async function to remove a permit by its hash
  * Refreshes when chainId, account, or initialization status changes
  */
-export const useCofhejsRemovePermit = () => {
-  const { chainId, account, initialized } = useCofhejsStatus();
+export const useCofheRemovePermit = () => {
+  const { chainId, account, initialized } = useCofheStatus();
   return useCallback(
     async (permitHash: string) => {
       if (!initialized || !chainId || !account) return;
@@ -311,8 +303,8 @@ export const useCofhejsRemovePermit = () => {
  * @returns Async function to set the active permit by its hash
  * Refreshes when chainId, account, or initialization status changes
  */
-export const useCofhejsSetActivePermit = () => {
-  const { chainId, account, initialized } = useCofhejsStatus();
+export const useCofheSetActivePermit = () => {
+  const { chainId, account, initialized } = useCofheStatus();
   return useCallback(
     async (permitHash: string) => {
       if (!initialized || !chainId || !account) return;
@@ -328,8 +320,8 @@ export const useCofhejsSetActivePermit = () => {
  * @returns The permit issuer address or null if no active permit
  * Refreshes when active permit changes
  */
-export const useCofhejsPermitIssuer = () => {
-  const permit = useCofhejsActivePermit();
+export const useCofhePermitIssuer = () => {
+  const permit = useCofheActivePermit();
   return useMemo(() => {
     if (!permit) return null;
     return permit.issuer;

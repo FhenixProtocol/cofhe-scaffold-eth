@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { zeroAddress } from "viem";
 import { ShieldCheckIcon } from "@heroicons/react/24/solid";
-import { useCofhejsAccount, useCofhejsCreatePermit, useCofhejsModalStore } from "~~/app/useCofhejs";
+import { useCofheAccount, useCofheCreatePermit, useCofheModalStore } from "~~/app/useCofhejs";
 import { AddressInput } from "~~/components/scaffold-eth";
 
 /**
@@ -28,10 +28,10 @@ import { AddressInput } from "~~/components/scaffold-eth";
 type ExpirationOption = "1 day" | "1 week" | "1 month";
 const shareablePermits = false;
 
-export const CofhejsPermitModal = () => {
-  const { generatePermitModalOpen, generatePermitModalCallback, setGeneratePermitModalOpen } = useCofhejsModalStore();
-  const createPermit = useCofhejsCreatePermit();
-  const account = useCofhejsAccount();
+export const CofhePermitModal = () => {
+  const { generatePermitModalOpen, generatePermitModalCallback, setGeneratePermitModalOpen } = useCofheModalStore();
+  const createPermit = useCofheCreatePermit();
+  const account = useCofheAccount();
   const [expiration, setExpiration] = useState<ExpirationOption>("1 week");
   const [recipient, setRecipient] = useState<string>("");
   const [name, setName] = useState<string>("");
