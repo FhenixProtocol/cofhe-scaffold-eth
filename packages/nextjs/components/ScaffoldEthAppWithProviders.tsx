@@ -7,7 +7,7 @@ import { AppProgressBar as ProgressBar } from "next-nprogress-bar";
 import { useTheme } from "next-themes";
 import { Toaster } from "react-hot-toast";
 import { WagmiProvider } from "wagmi";
-import { useInitializeCofhe } from "~~/app/useCofhejs";
+import { useInitializeCofhe } from "~~/app/useCofhe";
 import { Footer } from "~~/components/Footer";
 import { Header } from "~~/components/Header";
 import { CofhePermitModal } from "~~/components/cofhe/CofhejsPermitModal";

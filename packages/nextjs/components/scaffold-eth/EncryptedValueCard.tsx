@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import { FheTypes } from "@cofhe/sdk";
 import { LockClosedIcon, LockOpenIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
-import { useCofheInitialized, useCofheIsActivePermitValid, useCofheModalStore } from "~~/app/useCofhejs";
+import { useCofheInitialized, useCofheIsActivePermitValid, useCofheModalStore } from "~~/app/useCofhe";
 import { useDecryptValue } from "~~/app/useDecrypt";
 
 interface EncryptedZoneProps {

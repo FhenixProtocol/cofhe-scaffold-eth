@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { cofhesdkClient, useCofheAccount, useCofheInitialized } from "./useCofhejs";
+import { cofhesdkClient, useCofheAccount, useCofheInitialized } from "./useCofhe";
 import { FheTypes, UnsealedItem } from "@cofhe/sdk";
 import { zeroAddress } from "viem";
 import {

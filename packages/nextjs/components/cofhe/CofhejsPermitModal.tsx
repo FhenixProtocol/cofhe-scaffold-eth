@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { zeroAddress } from "viem";
 import { ShieldCheckIcon } from "@heroicons/react/24/solid";
-import { useCofheAccount, useCofheCreatePermit, useCofheModalStore } from "~~/app/useCofhejs";
+import { useCofheAccount, useCofheCreatePermit, useCofheModalStore } from "~~/app/useCofhe";
 import { AddressInput } from "~~/components/scaffold-eth";
 
 /**
@@ -22,7 +22,7 @@ import { AddressInput } from "~~/components/scaffold-eth";
  * This signature serves as proof that the user controls the wallet address associated with the permit.
  *
  * This modal will automatically open when a user attempts to decrypt a value in the `EncryptedValue` component.
- * It will also open if the user clicks the "Generate Permit" button in the `CofhejsPortal` component.
+ * It will also open if the user clicks the "Generate Permit" button in the `CofhePortal` component.
  */
 
 type ExpirationOption = "1 day" | "1 week" | "1 month";

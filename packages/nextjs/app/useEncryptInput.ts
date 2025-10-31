@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { cofhesdkClient, useCofheInitialized } from "./useCofhejs";
+import { cofhesdkClient, useCofheInitialized } from "./useCofhe";
 import {
   Encryptable,
   EncryptableAddress,
