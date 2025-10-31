@@ -21,10 +21,12 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   /**
    * CoFHE Initialization
    *
-   * The useInitializeCofhe hook initializes the CoFHE system with the connected wallet and chain configuration.
+   * The CoFHE SDK client is initialized in two steps.
+   * The client is constructed synchronously, with `supportedChains` provided at construction time.
+   * The useInitializeCofhe hook then makes sure the CoFHE SDK client is connected to the current wallet and is ready to function.
    * It performs the following key functions:
-   * - Sets up the FHE environment based on the current network (MAINNET, TESTNET, or MOCK)
-   * - Initializes the FHE keys, provider, and signer
+   * - Connects the CoFHE SDK client to the current provider and signer
+   * - Initializes the FHE keys
    * - Configures the wallet client for encrypted operations
    * - Handles initialization errors with user notifications
    *
