@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Permit } from "@cofhe/sdk/permits";
+import { Permit, PermitUtils } from "@cofhe/sdk/permits";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { ShieldCheckIcon } from "@heroicons/react/24/solid";
 import {
@@ -119,9 +119,9 @@ const InfoRow = ({
  * Shows a placeholder message when no permits are available.
  */
 const AllPermitsList = () => {
-  // const activePermit = useCofhejsActivePermit();
+  const activePermit = useCofhejsActivePermit();
   const allPermits = useCofhejsAllPermits();
-  // const removePermit = useCofhejsRemovePermit();
+  const removePermit = useCofhejsRemovePermit();
 
   if (allPermits.length === 0) {
     return (
@@ -133,10 +133,11 @@ const AllPermitsList = () => {
 
   return (
     <div className="flex flex-col gap-1 mt-1">
-      {/* {allPermits.map(({ data: permit, success }, index) => {
-        if (!success || !permit || permit.getHash() === activePermit?.getHash()) return null;
+      {allPermits.map((permit, index) => {
+        // skip it if it's the active permit as there's no point in nethier using it (it's already used) nor removing (it's being used)
+        if (activePermit && PermitUtils.getHash(permit) === PermitUtils.getHash(activePermit)) return null;
         return <PermitItem key={index} permit={permit} isActive={false} onRemove={removePermit} />;
-      })} */}
+      })}
     </div>
   );
 };
