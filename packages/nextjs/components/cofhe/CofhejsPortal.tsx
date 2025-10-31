@@ -57,7 +57,7 @@ export const CofhejsPortal = () => {
       <div className="dropdown-content z-2 p-4 mt-2 shadow-center shadow-accent bg-base-200 rounded-box gap-1 min-w-[275px]">
         <div className="flex flex-row justify-center items-center gap-2 px-2 py-1">
           <ShieldCheckIcon className="h-5 w-5 text-cofhe-primary" />
-          <span className="font-bold">Cofhejs Portal</span>
+          <span className="font-bold">CoFHE Portal</span>
         </div>
         <div className="flex flex-col gap-1 mt-2">
           <div className="menu-title text-xs">Initialization Status</div>
