@@ -154,11 +154,7 @@ export const useCofhejsChainId = () => {
  * @returns boolean indicating if FHE keys, provider, and signer are all initialized
  */
 export const useCofhejsInitialized = () => {
-  // const fheKeysInitialized = cofhesdkClient.initializationResults.keyFetchResult;
-  // const providerInitialized = cofhesdkClient.connected;
-  // const signerInitialized = cofhesdkClient.getSnapshot().signerInitialized;
   const { connected } = useCofhejsConnectionSnapshot();
-  console.log("useCofhejsInitialized / cofhesdkClient.connected", connected);
   return connected;
 };
 
