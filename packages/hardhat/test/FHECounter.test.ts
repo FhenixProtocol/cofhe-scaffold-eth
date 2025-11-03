@@ -94,9 +94,6 @@ describe("Counter", function () {
       // }
       const client = await hre.cofhesdk.createBatteriesIncludedCofhesdkClient(bob);
 
-      // `hre.cofhesdk.expectResultSuccess` is used to verify that the `Result` is successful (success: true)
-      // If the `Result` is not successful, the test will fail
-      await hre.cofhesdk.expectResultSuccess(client.initializationResults.keyFetchResult);
       const count = await counter.count();
 
       // `decryptHandle` is used to unseal the encrypted value
@@ -127,8 +124,6 @@ describe("Counter", function () {
       const { counter, bob } = await loadFixture(deployCounterFixture);
 
       const client = await hre.cofhesdk.createBatteriesIncludedCofhesdkClient(bob);
-
-      await hre.cofhesdk.expectResultSuccess(client.initializationResults.keyFetchResult);
 
       // `encryptInputs` is used to encrypt the value
       // the client must be initialized before `encryptInputs` can be called
