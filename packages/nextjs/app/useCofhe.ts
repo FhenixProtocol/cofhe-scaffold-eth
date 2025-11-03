@@ -62,27 +62,27 @@ export const useIsConnectedChainSupported = () => {
 };
 
 /**
- * Hook to initialize cofhe sdk with the connected wallet and chain configuration
- * Handles initialization errors and displays toast notifications on success or error
+ * Hook to track the connected wallet and chain and make sure cofhe is connected to the correct ones
+ * Handles connection errors and displays toast notifications on success or error
  * Refreshes when connected wallet or chain changes
  */
-export function useInitializeCofhe() {
+export function useConnectCofheClient() {
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
   const isChainSupported = useIsConnectedChainSupported();
 
   const handleError = (error: string) => {
-    console.error("cofhe initialization error:", error);
-    notification.error(`cofhe initialization error: ${error}`);
+    console.error("cofhe connection error:", error);
+    notification.error(`cofhe connection error: ${error}`);
   };
 
   useEffect(() => {
-    const initializeCofhe = async () => {
+    const connectCofhe = async () => {
       // Early exit if any of the required dependencies are missing
       if (!publicClient || !walletClient || !isChainSupported) return;
 
-      logBlockStart("useInitializeCofhe");
-      logBlockMessage("INITIALIZING     | Setting up CoFHE");
+      logBlockStart("useConnectCofheClient");
+      logBlockMessage("CONNECTING     | Setting up CoFHE");
 
       try {
         // TODO: are there any more async initialization results we need to wait for?
@@ -104,7 +104,7 @@ export function useInitializeCofhe() {
       }
     };
 
-    initializeCofhe();
+    connectCofhe();
   }, [walletClient, publicClient, isChainSupported]);
 }
 

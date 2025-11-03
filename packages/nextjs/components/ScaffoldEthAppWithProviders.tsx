@@ -7,7 +7,7 @@ import { AppProgressBar as ProgressBar } from "next-nprogress-bar";
 import { useTheme } from "next-themes";
 import { Toaster } from "react-hot-toast";
 import { WagmiProvider } from "wagmi";
-import { useInitializeCofhe } from "~~/app/useCofhe";
+import { useConnectCofheClient } from "~~/app/useCofhe";
 import { Footer } from "~~/components/Footer";
 import { Header } from "~~/components/Header";
 import { CofhePermitModal } from "~~/components/cofhe/CofhePermitModal";
@@ -19,22 +19,21 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   useInitializeNativeCurrencyPrice();
 
   /**
-   * CoFHE Initialization
+   * CoFHE connection hook
    *
    * The CoFHE SDK client is initialized in two steps.
    * The client is constructed synchronously, with `supportedChains` provided at construction time.
-   * The useInitializeCofhe hook then makes sure the CoFHE SDK client is connected to the current wallet and is ready to function.
+   * The useConnectCofheClient hook then makes sure the CoFHE SDK client is connected to the current wallet and is ready to function.
    * It performs the following key functions:
    * - Connects the CoFHE SDK client to the current provider and signer
-   * - Initializes the FHE keys
    * - Configures the wallet client for encrypted operations
-   * - Handles initialization errors with user notifications
+   * - Handles connection errors with user notifications
    *
    * This hook is essential for enabling FHE (Fully Homomorphic Encryption) operations
    * throughout the application. It automatically refreshes when the connected wallet
    * or chain changes to maintain proper configuration.
    */
-  useInitializeCofhe();
+  useConnectCofheClient();
 
   return (
     <>
