@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
+import { MOCKS_ZK_VERIFIER_SIGNER_ADDRESS } from "@cofhe/hardhat-plugin";
 import { Result } from "@cofhe/sdk";
 import { hardhat } from "@cofhe/sdk/chains";
 import {
@@ -24,12 +25,12 @@ import { notification } from "~~/utils/scaffold-eth";
 // This is only used in the mock environment to submit the mock encrypted inputs so that they can be used in FHE ops.
 // This has no effect in the mainnet or testnet environments.
 // This matches hardhat-plugin network-specifc injection https://github.com/FhenixProtocol/cofhesdk/blob/26d59bbe58695c84d48d6d7cd0eb3174d404e36f/packages/hardhat-plugin/src/index.ts#L380
-const mockHardhatZkvSignerPrivateKey = "0x6C8D7F768A6BB4AAFE85E8A2F5A9680355239C7E14646ED62B044E39DE154512";
 const mockHardhatZkvSigner = createWalletClient({
-  account: privateKeyToAccount(mockHardhatZkvSignerPrivateKey),
+  account: privateKeyToAccount(MOCKS_ZK_VERIFIER_SIGNER_ADDRESS),
   chain: chains.hardhat,
   transport: http(chains.hardhat.rpcUrls.default.http[0]), // hardhat RPC URL
 });
+
 const config = createCofhesdkConfig({
   supportedChains: [hardhat],
   mocks: {
