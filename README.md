@@ -159,19 +159,10 @@ const [bob] = await hre.ethers.getSigners()
 // `hre.cofhesdk.createBatteriesIncludedCofhesdkClient` is used to initialize FHE with a Hardhat signer
 // Initialization is required before any `encrypt` or `decrypt` operations can be performed
 // `createBatteriesIncludedCofhesdkClient` is a helper function that initializes FHE with a Hardhat signer
-// It returns a `Promise<Result<>>` type.
+// Returns a `Promise<CofhesdkClient>` type.
 
-// The `Result<T>` type looks like this:
-// {
-//   success: boolean,
-//   data: T (Permit | undefined in the case of initializeWithHardhatSigner),
-//   error: CofhesdkError | null,
-// }
 const client = await hre.cofhesdk.createBatteriesIncludedCofhesdkClient(bob);
 
-// `hre.cofhesdk.expectResultSuccess` is used to verify that the `Result` is successful (success: true)
-// If the `Result` is not successful, the test will fail
-await hre.cofhesdk.expectResultSuccess(client.initializationResults.keyFetchResult);
 ```
 
 To verify the value of an encrypted variable, we can use:
