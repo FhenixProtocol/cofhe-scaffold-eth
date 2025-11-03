@@ -195,8 +195,7 @@ export const useCofheIsActivePermitValid = () => {
   const permit = useCofheActivePermit();
   return useMemo(() => {
     if (!permit) return false;
-    const deserializedPermit = PermitUtils.deserialize(permit);
-    return PermitUtils.isValid(deserializedPermit);
+    return PermitUtils.isValid(permit);
   }, [permit]);
 };
 
