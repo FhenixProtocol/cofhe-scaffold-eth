@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
-import { MOCKS_ZK_VERIFIER_SIGNER_PRIVATE_KEY } from "@cofhe/hardhat-plugin/consts";
 import { hardhat } from "@cofhe/sdk/chains";
 import {
   CreateSelfPermitOptions,
@@ -11,8 +10,6 @@ import {
   permitStore,
 } from "@cofhe/sdk/permits";
 import { createCofhesdkClient, createCofhesdkConfig } from "@cofhe/sdk/web";
-import { createWalletClient, http } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
 import * as chains from "viem/chains";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { create } from "zustand";
@@ -20,23 +17,10 @@ import scaffoldConfig from "~~/scaffold.config";
 import { logBlockMessage, logBlockMessageAndEnd, logBlockStart } from "~~/utils/cofhe/logging";
 import { notification } from "~~/utils/scaffold-eth";
 
-// Hard coded signer for submitting encrypted inputs
-// This is only used in the mock environment to submit the mock encrypted inputs so that they can be used in FHE ops.
-// This has no effect in the mainnet or testnet environments.
-// This matches hardhat-plugin network-specifc injection https://github.com/FhenixProtocol/cofhesdk/blob/26d59bbe58695c84d48d6d7cd0eb3174d404e36f/packages/hardhat-plugin/src/index.ts#L380
-const mockHardhatZkvSigner = createWalletClient({
-  account: privateKeyToAccount(MOCKS_ZK_VERIFIER_SIGNER_PRIVATE_KEY),
-  chain: chains.hardhat,
-  transport: http(chains.hardhat.rpcUrls.default.http[0]), // hardhat RPC URL
-});
-
 const config = createCofhesdkConfig({
   supportedChains: [hardhat],
   mocks: {
     sealOutputDelay: 1000,
-  },
-  _internal: {
-    zkvWalletClient: mockHardhatZkvSigner,
   },
 });
 export const cofhesdkClient = createCofhesdkClient(config);
