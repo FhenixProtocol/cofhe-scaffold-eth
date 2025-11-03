@@ -84,21 +84,22 @@ describe("Counter", function () {
       // `hre.cofhesdk.createBatteriesIncludedCofhesdkClient` is used to initialize FHE with a Hardhat signer
       // Initialization is required before any `encrypt` or `decrypt` operations can be performed
       // `createBatteriesIncludedCofhesdkClient` is a helper function that initializes FHE with a Hardhat signer
-      // It returns a `Promise<Result<>>` type.
+      // Returns a `Promise<CofhesdkClient>` type.
 
-      // The `Result<T>` type looks like this:
-      // {
-      //   success: boolean,
-      //   data: T (Permit | undefined in the case of initializeWithHardhatSigner),
-      //   error: CofhesdkError | null,
-      // }
       const client = await hre.cofhesdk.createBatteriesIncludedCofhesdkClient(bob);
 
       const count = await counter.count();
 
       // `decryptHandle` is used to unseal the encrypted value
       // the client must be initialized before `unseal` can be called
+      // `decrypt` returns a `Promise<Result<T>>` type.
       const unsealedResult = await client.decryptHandle(count, FheTypes.Uint32).decrypt();
+      // The `Result<T>` type looks like this:
+      // {
+      //   success: boolean,
+      //   data: T (Permit | undefined in the case of initializeWithHardhatSigner),
+      //   error: CofhesdkError | null,
+      // }
 
       // `hre.cofhesdk.expectResultValue` is used to verify that the `Result.data` is the expected value
       // If the `Result.data` is not the expected value, the test will fail
@@ -127,7 +128,15 @@ describe("Counter", function () {
 
       // `encryptInputs` is used to encrypt the value
       // the client must be initialized before `encryptInputs` can be called
+      // `encrypt` returns a `Promise<Result<T>>` type.
+
       const encryptResult = await client.encryptInputs([Encryptable.uint32(5n)]).encrypt();
+      // The `Result<T>` type looks like this:
+      // {
+      //   success: boolean,
+      //   data: T (Permit | undefined in the case of initializeWithHardhatSigner),
+      //   error: CofhesdkError | null,
+      // }
 
       const [encryptedInput] = await hre.cofhesdk.expectResultSuccess(encryptResult);
       await hre.cofhesdk.mocks.expectPlaintext(encryptedInput.ctHash, 5n);
