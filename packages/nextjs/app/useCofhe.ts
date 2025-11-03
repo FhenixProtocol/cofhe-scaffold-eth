@@ -99,25 +99,22 @@ export function useInitializeCofhe() {
       if (!publicClient || !walletClient || !isChainSupported) return;
 
       logBlockStart("useInitializeCofhe");
-      logBlockMessage("INITIALIZING     | Setting up CoFHE environment");
+      logBlockMessage("INITIALIZING     | Setting up CoFHE");
 
       try {
         // TODO: are there any more async initialization results we need to wait for?
 
         const connectionResult = await cofhesdkClient.connect(publicClient, walletClient);
-        handleResult("connectionResult", connectionResult);
-        const initializationResult = await cofhesdkClient.initializationResults.keyFetchResult;
-        handleResult("initializationResult", initializationResult);
-
-        notification.success("Cofhe initialized successfully");
-        function handleResult<T>(prefix: string, result: Result<T>) {
-          if (result.success) {
-            logBlockMessageAndEnd(`[handleResult:${prefix}]SUCCESS          | CoFHE environment initialization`);
+        if (connectionResult.success) {
+          logBlockMessageAndEnd(`[connectionResult] SUCCESS          | CoFHE environment initialization`);
           } else {
-            logBlockMessageAndEnd(`FAILED           | ${result.error.message ?? String(initializationResult.error)}`);
-            handleError(result.error.message ?? String(initializationResult.error));
+          logBlockMessageAndEnd(
+            `FAILED           | ${connectionResult.error.message ?? String(connectionResult.error)}`,
+          );
+          handleError(connectionResult.error.message ?? String(connectionResult.error));
           }
-        }
+
+        notification.success("Cofhe connected successfully");
       } catch (err) {
         logBlockMessageAndEnd(`FAILED           | ${err instanceof Error ? err.message : "Unknown error"}`);
         handleError(err instanceof Error ? err.message : "Unknown error initializing cofhe");
