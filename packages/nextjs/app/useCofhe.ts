@@ -11,8 +11,8 @@ import {
   permitStore,
 } from "@cofhe/sdk/permits";
 import { createCofhesdkClient, createCofhesdkConfig } from "@cofhe/sdk/web";
-import { WalletClient, createWalletClient, http } from "viem";
-import { PrivateKeyAccount, privateKeyToAccount } from "viem/accounts";
+import { createWalletClient, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 import * as chains from "viem/chains";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { create } from "zustand";
@@ -20,28 +20,22 @@ import scaffoldConfig from "~~/scaffold.config";
 import { logBlockMessage, logBlockMessageAndEnd, logBlockStart } from "~~/utils/cofhe/logging";
 import { notification } from "~~/utils/scaffold-eth";
 
-const zkvSignerPrivateKey = "0x6C8D7F768A6BB4AAFE85E8A2F5A9680355239C7E14646ED62B044E39DE154512";
-function createWalletClientFromPrivateKey(privateKey: `0x${string}`): WalletClient {
-  const account: PrivateKeyAccount = privateKeyToAccount(privateKey);
-  const url = chains.hardhat.rpcUrls.default.http[0];
-  return createWalletClient({
-    account,
-    chain: chains.hardhat,
-    transport: http(url),
-  });
-}
-const mockViemZkvSigner = createWalletClientFromPrivateKey(zkvSignerPrivateKey);
-
+// Hard coded signer for submitting encrypted inputs
+// This is only used in the mock environment to submit the mock encrypted inputs so that they can be used in FHE ops.
+// This has no effect in the mainnet or testnet environments.
+const mockHardhatZkvSignerPrivateKey = "0x6C8D7F768A6BB4AAFE85E8A2F5A9680355239C7E14646ED62B044E39DE154512";
+const mockHardhatZkvSigner = createWalletClient({
+  account: privateKeyToAccount(mockHardhatZkvSignerPrivateKey),
+  chain: chains.hardhat,
+  transport: http(chains.hardhat.rpcUrls.default.http[0]), // hardhat RPC URL
+});
 const config = createCofhesdkConfig({
   supportedChains: [hardhat],
   mocks: {
     sealOutputDelay: 1000,
   },
   _internal: {
-    // Hard coded signer for submitting encrypted inputs
-    // This is only used in the mock environment to submit the mock encrypted inputs so that they can be used in FHE ops.
-    // This has no effect in the mainnet or testnet environments.
-    zkvWalletClient: mockViemZkvSigner,
+    zkvWalletClient: mockHardhatZkvSigner,
   },
 });
 export const cofhesdkClient = createCofhesdkClient(config);
