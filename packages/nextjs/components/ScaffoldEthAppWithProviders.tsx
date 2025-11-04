@@ -7,10 +7,10 @@ import { AppProgressBar as ProgressBar } from "next-nprogress-bar";
 import { useTheme } from "next-themes";
 import { Toaster } from "react-hot-toast";
 import { WagmiProvider } from "wagmi";
-import { useInitializeCofhejs } from "~~/app/useCofhejs";
+import { useConnectCofheClient } from "~~/app/useCofhe";
 import { Footer } from "~~/components/Footer";
 import { Header } from "~~/components/Header";
-import { CofhejsPermitModal } from "~~/components/cofhe/CofhejsPermitModal";
+import { CofhePermitModal } from "~~/components/cofhe/CofhePermitModal";
 import { BlockieAvatar } from "~~/components/scaffold-eth";
 import { useInitializeNativeCurrencyPrice } from "~~/hooks/scaffold-eth";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
@@ -19,20 +19,21 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   useInitializeNativeCurrencyPrice();
 
   /**
-   * CoFHE Initialization
+   * CoFHE connection hook
    *
-   * The useInitializeCofhejs hook initializes the CoFHE system with the connected wallet and chain configuration.
+   * The CoFHE SDK client is initialized in two steps.
+   * The client is constructed synchronously, with `supportedChains` provided at construction time.
+   * The useConnectCofheClient hook then makes sure the CoFHE SDK client is connected to the current wallet and is ready to function.
    * It performs the following key functions:
-   * - Sets up the FHE environment based on the current network (MAINNET, TESTNET, or MOCK)
-   * - Initializes the FHE keys, provider, and signer
+   * - Connects the CoFHE SDK client to the current provider and signer
    * - Configures the wallet client for encrypted operations
-   * - Handles initialization errors with user notifications
+   * - Handles connection errors with user notifications
    *
    * This hook is essential for enabling FHE (Fully Homomorphic Encryption) operations
    * throughout the application. It automatically refreshes when the connected wallet
    * or chain changes to maintain proper configuration.
    */
-  useInitializeCofhejs();
+  useConnectCofheClient();
 
   return (
     <>
@@ -42,7 +43,7 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
         <Footer />
       </div>
       <Toaster />
-      <CofhejsPermitModal />
+      <CofhePermitModal />
     </>
   );
 };

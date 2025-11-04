@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { useCofhejsAccount, useCofhejsInitialized } from "./useCofhejs";
-import { FheTypes, UnsealedItem } from "cofhejs/web";
-import { cofhejs } from "cofhejs/web";
+import { cofhesdkClient, useCofheAccount, useCofheConnected } from "./useCofhe";
+import { FheTypes, UnsealedItem } from "@cofhe/sdk";
 import { zeroAddress } from "viem";
 import {
   encryptedValueToString,
@@ -48,11 +47,7 @@ export type DecryptionResult<T extends FheTypes> =
       state: "error";
     };
 
-const _decryptValue = async <T extends FheTypes>(
-  fheType: T,
-  value: bigint,
-  address: string,
-): Promise<DecryptionResult<T>> => {
+const _decryptValue = async <T extends FheTypes>(fheType: T, value: bigint): Promise<DecryptionResult<T>> => {
   logBlockStart("useDecrypt - _decryptValue");
   logBlockMessage(`DECRYPTING VALUE | ${encryptedValueToString(fheType, value)}`);
 
@@ -71,7 +66,7 @@ const _decryptValue = async <T extends FheTypes>(
     } as DecryptionResult<T>;
   }
 
-  const result = await cofhejs.unseal(value, fheType, address);
+  const result = await cofhesdkClient.decryptHandle(value, fheType).decrypt();
   if (result.success) {
     logBlockMessageAndEnd(
       `SUCCESS          | ${encryptedValueToString(fheType, value)} => ${plaintextToString(fheType, result.data)}`,
@@ -129,7 +124,7 @@ const initialDecryptionResult = <T extends FheTypes>(
 };
 
 /**
- * Hook to decrypt a value using cofhejs
+ * Hook to decrypt a value using cofhe sdk
  * @param fheType - The type of the value to decrypt
  * @param ctHash - The hash of the encrypted value
  * @returns Object containing a function to decrypt the value and the result of the decryption
@@ -138,8 +133,8 @@ export const useDecryptValue = <T extends FheTypes>(
   fheType: T,
   ctHash: bigint | null | undefined,
 ): { onDecrypt: () => Promise<void>; result: DecryptionResult<T> } => {
-  const cofhejsAccount = useCofhejsAccount();
-  const cofhejsInitialized = useCofhejsInitialized();
+  const cofheAccount = useCofheAccount();
+  const cofheConnected = useCofheConnected();
   const [result, setResult] = useState<DecryptionResult<T>>(initialDecryptionResult(fheType, ctHash));
 
   // Reset when ctHash changes
@@ -158,12 +153,12 @@ export const useDecryptValue = <T extends FheTypes>(
       });
       return;
     }
-    if (!cofhejsInitialized || cofhejsAccount == null) {
+    if (!cofheConnected || cofheAccount == null) {
       setResult({
         fheType,
         ctHash,
         value: null,
-        error: !cofhejsInitialized ? "Cofhejs not initialized" : "No account connected",
+        error: !cofheConnected ? "Cofhe not connected" : "No account connected",
         state: "error",
       });
       return;
@@ -177,7 +172,7 @@ export const useDecryptValue = <T extends FheTypes>(
       state: "pending",
     });
     try {
-      const result = await _decryptValue(fheType, ctHash, cofhejsAccount);
+      const result = await _decryptValue(fheType, ctHash);
       setResult(result);
     } catch (error) {
       setResult({
@@ -188,7 +183,7 @@ export const useDecryptValue = <T extends FheTypes>(
         state: "error",
       });
     }
-  }, [fheType, ctHash, cofhejsAccount, cofhejsInitialized]);
+  }, [fheType, ctHash, cofheAccount, cofheConnected]);
 
   return {
     onDecrypt,

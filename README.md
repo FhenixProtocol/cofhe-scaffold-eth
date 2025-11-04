@@ -37,12 +37,12 @@ yarn start
 - Hardhat
 
   - `@fhenixprotocol/cofhe-contracts` - Package containing `FHE.sol`. `FHE.sol` is a library that exposes FHE arithmetic operations like `FHE.add` and `FHE.mul` along with access control functions.
-  - `@fhenixprotocol/cofhe-mock-contracts` - The CoFHE coprocessor exists off-chain. `cofhe-mock-contracts` are a fully on-chain drop in replacement for the off-chain components. These mocks allow better developer and testing experience when working with FHE.
-  - `cofhe-hardhat-plugin` - A hardhat plugin responsible for deploying the mock contracts on the hardhat network and during tests. Also exposes testing utility functions in `hre.cofhe.___`.
-  - `cofhejs` - Primary connection to the CoFHE coprocessor. Exposes functions like `encrypt` and `unseal`. Manages access permits. Automatically plays nicely with the mock environment.
+  - `@cofhe/mock-contracts` - The CoFHE coprocessor exists off-chain. `@cofhe/mock-contracts` are a fully on-chain drop-in replacement for the off-chain components. These mocks allow better developer and testing experience when working with FHE. Is transparently used as a dependency of `@cofhe/hardhat-plugin`
+  - `@cofhe/hardhat-plugin` - A hardhat plugin responsible for deploying the mock contracts on the hardhat network and during tests. Also exposes testing utility functions in `hre.cofhesdk.___`.
+  - `@cofhe/sdk` - Primary connection to the CoFHE coprocessor. Exposes functions like `encryptInputs` (for sealing) and `decryptHandle` (for unsealing). Manages access permits. Automatically plays nicely with the mock environment.
 
 - Nextjs
-  - `cofhejs` - Primary connection to the CoFHE coprocessor. Exposes functions like `encrypt` and `unseal`. Manages access permits. Automatically plays nicely with the mock environment.
+  - `@cofhe/sdk` - Primary connection to the CoFHE coprocessor. Exposes functions like `encryptInputs` (for sealing) and `decryptHandle` (for unsealing). Manages access permits. Automatically plays nicely with the mock environment.
 
 ## Working with FHE Smart Contracts
 
@@ -151,80 +151,69 @@ Key concepts in FHE contract development:
 
 ### Testing your FHE Contract
 
-The [`FHECounter.test.ts`](packages/hardhat/test/FHECounter.test.ts) file demonstrates testing FHE contracts using the mock environment. Before using `cofhejs.encrypt` to prepare input variables, or `cofhejs.unseal` to read encrypted data, cofhejs must be initialized. In a hardhat environment there is an exposed utility function:
+The [`FHECounter.test.ts`](packages/hardhat/test/FHECounter.test.ts) file demonstrates testing FHE contracts using the mock environment. Before using `cofhesdkClient.encryptInput` to prepare input variables, or `cofhesdkClient.decryptHandle` to read encrypted data, cofhe must be initialized and connected. In a hardhat environment there is an exposed utility function:
 
 ```typescript
 const [bob] = await hre.ethers.getSigners()
-//     ^? HardhatEthersSigner
 
-// `hre.cofhe.initializeWithHardhatSigner` is used to initialize FHE with a Hardhat signer
-// Initialization is required before any `cofhejs.unseal` or `cofhejs.encrypt` operations can be performed
-// `initializeWithHardhatSigner` is a helper function that initializes FHE with a Hardhat signer
-// It returns a `Promise<Result<>>` type.
+// `hre.cofhesdk.createBatteriesIncludedCofhesdkClient` is used to initialize FHE with a Hardhat signer
+// Initialization is required before any `encrypt` or `decrypt` operations can be performed
+// `createBatteriesIncludedCofhesdkClient` is a helper function that initializes FHE with a Hardhat signer
+// Returns a `Promise<CofhesdkClient>` type.
 
-// The `Result<T>` type looks like this:
-// {
-//   success: boolean,
-//   data: T (Permit | undefined in the case of initializeWithHardhatSigner),
-//   error: CofhejsError | null,
-// }
-const initializeResult = await hre.cofhe.initializeWithHardhatSigner(bob)
+const client = await hre.cofhesdk.createBatteriesIncludedCofhesdkClient(bob);
 
-// `hre.cofhe.expectResultSuccess` is used to verify that the `Result` is successful (success: true)
-// If the `Result` is not successful, the test will fail
-await hre.cofhe.expectResultSuccess(initializeResult)
 ```
 
 To verify the value of an encrypted variable, we can use:
 
 ```typescript
 // Get the encrypted count variable
-const count = await counter.count()
+const count = await counter.count();
 
-// `hre.cofhe.mocks.expectPlaintext` is used to verify that the encrypted count is 0
+// `hre.cofhesdk.mocks.expectPlaintext` is used to verify that the encrypted value is 0
 // This uses the encrypted variable `count` and retrieves the plaintext value from the on-chain mock contracts
 // This kind of test can only be done in a mock environment where the plaintext value is known
-await hre.cofhe.mocks.expectPlaintext(count, 0n)
+await hre.cofhesdk.mocks.expectPlaintext(count, 0n);
 ```
 
-To read the encrypted variable directly, we can use `cofhejs.unseal`:
+To read the encrypted variable directly, we can use `cofhesdkClient.decryptHandle`:
 
 ```typescript
-const count = await counter.count()
+const count = await counter.count();
 
-// `cofhejs.unseal` is used to unseal the encrypted value
-// cofhejs must be initialized before `unseal` can be called
-// `FheType.Uint32` tells `unseal` the type of the encrypted variable
-const unsealedResult = await cofhejs.unseal(count, FheTypes.Uint32)
+// `decryptHandle` is used to unseal the encrypted value
+// the client must be initialized and connected before `unseal` can be called
+const unsealedResult = await client.decryptHandle(count, FheTypes.Uint32).decrypt();
 ```
 
-To encrypt a variable for use as an `InEuint*` we can use `cofhejs.encrypt`:
+To encrypt a variable for use as an `InEuint*` we can use `cofhesdkClient.encryptInputs`:
 
 ```typescript
-// `cofhejs.encrypt` is used to encrypt the value
-// cofhejs must be initialized before `encrypt` can be called
-// This accepts an array of values to be encrypted, using the `Encryptable` type from `cofhejs`
-const encryptResult = await cofhejs.encrypt([Encryptable.uint32(5n)] as const)
-const [encryptedInput] = await hre.cofhe.expectResultSuccess(encryptResult)
+// `encryptInputs` is used to encrypt the value
+// the client must be initialized and connected before `encryptInputs` can be called
+const encryptResult = await client.encryptInputs([Encryptable.uint32(5n)]).encrypt();
 
-await counter.connect(bob).set(encryptedInput)
+const [encryptedInput] = await hre.cofhesdk.expectResultSuccess(encryptResult);
+await hre.cofhesdk.mocks.expectPlaintext(encryptedInput.ctHash, 5n);
 
-// Check that the count was updated correctly
-const count = await counter.count()
-await hre.cofhe.mocks.expectPlaintext(count, 5n)
+await counter.connect(bob).set(encryptedInput);
+
+const count = await counter.count();
+await hre.cofhesdk.mocks.expectPlaintext(count, 5n);
 ```
 
 When global logging is needed we can use the utilities:
 
 ```typescript
-hre.cofhe.mocks.enableLogs()
-hre.cofhe.mocks.disableLogs()
+hre.cofhesdk.mocks.enableLogs()
+hre.cofhesdk.mocks.disableLogs()
 ```
 
 or we can use targeted logging like this:
 
 ```typescript
-await hre.cofhe.mocks.withLogs('counter.increment()', async () => {
+await hre.cofhesdk.mocks.withLogs('counter.increment()', async () => {
 	await counter.connect(bob).increment()
 })
 ```
@@ -247,37 +236,39 @@ which will result in logs like this:
 
 ### Initialization
 
-The frontend initialization begins in [`ScaffoldEthAppWithProviders.tsx`](packages/nextjs/components/ScaffoldEthAppWithProviders.tsx) where the `useInitializeCofhejs` hook is called:
+The frontend initialization begins in [`ScaffoldEthAppWithProviders.tsx`](packages/nextjs/components/ScaffoldEthAppWithProviders.tsx) where the `useInitializeCofhe` hook is called:
 
 ```typescript
 /**
- * CoFHE Initialization
- *
- * The useInitializeCofhejs hook initializes the CoFHE system with the connected wallet and chain configuration.
- * It performs the following key functions:
- * - Sets up the FHE environment based on the current network (MAINNET, TESTNET, or MOCK)
- * - Initializes the FHE keys, provider, and signer
- * - Configures the wallet client for encrypted operations
- * - Handles initialization errors with user notifications
- *
- * This hook is essential for enabling FHE (Fully Homomorphic Encryption) operations
- * throughout the application. It automatically refreshes when the connected wallet
- * or chain changes to maintain proper configuration.
- */
-useInitializeCofhejs()
+* CoFHE Initialization
+*
+* The CoFHE SDK client is initialized in two steps.
+* The client is constructed synchronously, with `supportedChains` provided at construction time.
+* The useInitializeCofhe hook then makes sure the CoFHE SDK client is connected to the current wallet and is ready to function.
+* It performs the following key functions:
+* - Connects the CoFHE SDK client to the current provider and signer
+* - Initializes the FHE keys
+* - Configures the wallet client for encrypted operations
+* - Handles initialization errors with user notifications
+*
+* This hook is essential for enabling FHE (Fully Homomorphic Encryption) operations
+* throughout the application. It automatically refreshes when the connected wallet
+* or chain changes to maintain proper configuration.
+*/
+useInitializeCofhe()
 ```
 
 This hook handles the complete setup of the CoFHE system, including environment detection, wallet client configuration, and permit management initialization. It runs automatically when the wallet or chain changes, ensuring the FHE system stays properly configured.
 
 ### CoFHE Portal
 
-The [`CofhejsPortal`](packages/nextjs/components/cofhe/CofhejsPortal.tsx) component provides a dropdown interface for managing CoFHE permits and viewing system status. It's integrated into the [`Header`](packages/nextjs/components/Header.tsx) component as a shield icon button:
+The [`CofhePortal`](packages/nextjs/components/cofhe/CofhePortal.tsx) component provides a dropdown interface for managing CoFHE permits and viewing system status. It's integrated into the [`Header`](packages/nextjs/components/Header.tsx) component as a shield icon button:
 
 ```typescript
 /**
  * CoFHE Portal Integration
  *
- * The CofhejsPortal component is integrated into the header to provide easy access to
+ * The CofhePortal component is integrated into the header to provide easy access to
  * CoFHE permit management functionality. It appears as a shield icon button that opens
  * a dropdown menu containing:
  * - System initialization status
@@ -287,12 +278,12 @@ The [`CofhejsPortal`](packages/nextjs/components/cofhe/CofhejsPortal.tsx) compon
  * This placement ensures the portal is always accessible while using the application,
  * allowing users to manage their permits and monitor system status from any page.
  */
-<CofhejsPortal />
+<CofhePortal />
 ```
 
 The portal displays:
 
-- **Initialization Status**: Shows whether CoFHE is initialized, the connected account, and current network
+- **Connection Status**: Shows whether CoFHE is connected, the connected account, and current network
 - **Active Permit**: Displays details about the currently active permit including name, ID, issuer, and expiration
 - **Permit Management**: Allows users to create new permits, switch between existing permits, and delete unused permits
 
@@ -330,19 +321,19 @@ The [`FHECounterComponent`](packages/nextjs/app/FHECounterComponent.tsx) demonst
  *
  * Demonstrates the process of encrypting user input before sending it to the blockchain:
  * 1. User enters a number in the input field
- * 2. When "Set" is clicked, the number is encrypted using cofhejs
+ * 2. When "Set" is clicked, the number is encrypted using cofhe SDK
  * 3. The encrypted value is then sent to the smart contract
  *
  * This ensures the actual value is never exposed on the blockchain,
  * maintaining privacy while still allowing computations.
  */
-const encryptedResult = await cofhejs.encrypt([Encryptable.uint32(input)])
-// cofhejs.encrypt returns a result object with success status and data/error
+const encryptedResult = await cofhesdkClient.encryptInputs([encryptable]).encrypt();
+// encryptedResult is a result object with success status and data/error
 ```
 
 ### Permit Modal
 
-The [`CofhejsPermitModal`](packages/nextjs/components/cofhe/CofhejsPermitModal.tsx) allows users to generate cryptographic permits for accessing encrypted data. This modal automatically opens when a user attempts to decrypt a value in the `EncryptedValue` component without a valid permit:
+The [`CofhePermitModal`](packages/nextjs/components/cofhe/CofhePermitModal.tsx) allows users to generate cryptographic permits for accessing encrypted data. This modal automatically opens when a user attempts to decrypt a value in the `EncryptedValue` component without a valid permit:
 
 ```typescript
 /**
@@ -385,34 +376,34 @@ The [`EncryptedValueCard`](packages/nextjs/components/scaffold-eth/EncryptedValu
 - Provides a visual wrapper with gradient borders to indicate encrypted content
 - Includes a shield icon to clearly mark encrypted data areas
 
-#### useCofhejs Hooks
+#### useCofhe Hooks
 
-The [`useCofhejs.ts`](packages/nextjs/app/useCofhejs.ts) file provides comprehensive React hooks for FHE operations:
+The [`useCofhe.ts`](packages/nextjs/app/useCofhe.ts) file provides comprehensive React hooks for FHE operations:
 
 **Initialization Hooks**:
 
 ```typescript
-// Hook to initialize cofhejs with the connected wallet and chain configuration
+// Hook to initialize cofhe with the connected wallet and chain configuration
 // Handles initialization errors and displays toast notifications on success or error
 // Refreshes when connected wallet or chain changes
-useInitializeCofhejs()
+useInitializeCofhe()
 
-// Hook to check if cofhejs is fully initialized (FHE keys, provider, and signer)
+// Hook to check if cofhe is connected (provider, and signer)
 // This is used to determine if the user is ready to use the FHE library
 // FHE based interactions (encrypt / decrypt) should be disabled until this is true
-useCofhejsInitialized()
+useCofheConnected()
 
-// Hook to get the current account initialized in cofhejs
-useCofhejsAccount()
+// Hook to get the current account connected to cofhe
+useCofheAccount()
 ```
 
 **Status Hooks**:
 
 ```typescript
-// Hook to get the complete status of cofhejs
+// Hook to get the complete status of cofhe
 // Returns Object containing chainId, account, and initialization status
 // Refreshes when any of the underlying values change
-useCofhejsStatus()
+useCofheStatus()
 
 // Hook to check if the currently connected chain is supported by the application
 // Returns boolean indicating if the current chain is in the target networks list
@@ -426,32 +417,32 @@ useIsConnectedChainSupported()
 // Hook to create a new permit
 // Returns Async function to create a permit with optional options
 // Refreshes when chainId, account, or initialization status changes
-useCofhejsCreatePermit()
+useCofheCreatePermit()
 
 // Hook to remove a permit
 // Returns Async function to remove a permit by its hash
 // Refreshes when chainId, account, or initialization status changes
-useCofhejsRemovePermit()
+useCofheRemovePermit()
 
 // Hook to select the active permit
 // Returns Async function to set the active permit by its hash
 // Refreshes when chainId, account, or initialization status changes
-useCofhejsSetActivePermit()
+useCofheSetActivePermit()
 
 // Hook to get the active permit object
 // Returns The active permit object or null if not found/valid
 // Refreshes when active permit hash changes
-useCofhejsActivePermit()
+useCofheActivePermit()
 
 // Hook to check if the active permit is valid
 // Returns boolean indicating if the active permit is valid
 // Refreshes when permit changes
-useCofhejsIsActivePermitValid()
+useCofheIsActivePermitValid()
 
 // Hook to get all permit objects for the current chain and account
 // Returns Array of permit objects
 // Refreshes when permit hashes change
-useCofhejsAllPermits()
+useCofheAllPermits()
 ```
 
 #### useDecrypt Hook
@@ -460,7 +451,7 @@ The [`useDecrypt.ts`](packages/nextjs/app/useDecrypt.ts) file provides utilities
 
 ```typescript
 /**
- * Hook to decrypt a value using cofhejs
+ * Hook to decrypt a value using cofhe
  * @param fheType - The type of the value to decrypt
  * @param ctHash - The hash of the encrypted value
  * @returns Object containing a function to decrypt the value and the result of the decryption

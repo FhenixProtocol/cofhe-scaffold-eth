@@ -1,4 +1,4 @@
-import { FheTypes } from "cofhejs/web";
+import { FheTypes } from "@cofhe/sdk";
 
 export const logBlockStart = (message: string) => {
   console.log("┌──────────────────┬──────────────────────────────────────────────────");

@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useEncryptInput } from "./useEncryptInput";
-import { FheTypes } from "cofhejs/web";
+import { FheTypes } from "@cofhe/sdk";
 import { IntegerInput, IntegerVariant } from "~~/components/scaffold-eth";
 import { EncryptedValue } from "~~/components/scaffold-eth/EncryptedValueCard";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
@@ -40,7 +40,7 @@ export const FHECounterComponent = () => {
  *
  * Demonstrates the process of encrypting user input before sending it to the blockchain:
  * 1. User enters a number in the input field
- * 2. When "Set" is clicked, the number is encrypted using cofhejs
+ * 2. When "Set" is clicked, the number is encrypted using CoFHE SDK
  * 3. The encrypted value is then sent to the smart contract
  *
  * This ensures the actual value is never exposed on the blockchain,

@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { zeroAddress } from "viem";
 import { ShieldCheckIcon } from "@heroicons/react/24/solid";
-import { useCofhejsAccount, useCofhejsCreatePermit, useCofhejsModalStore } from "~~/app/useCofhejs";
+import { useCofheAccount, useCofheCreatePermit, useCofheModalStore } from "~~/app/useCofhe";
 import { AddressInput } from "~~/components/scaffold-eth";
 
 /**
@@ -22,16 +22,16 @@ import { AddressInput } from "~~/components/scaffold-eth";
  * This signature serves as proof that the user controls the wallet address associated with the permit.
  *
  * This modal will automatically open when a user attempts to decrypt a value in the `EncryptedValue` component.
- * It will also open if the user clicks the "Generate Permit" button in the `CofhejsPortal` component.
+ * It will also open if the user clicks the "Generate Permit" button in the `CofhePortal` component.
  */
 
 type ExpirationOption = "1 day" | "1 week" | "1 month";
 const shareablePermits = false;
 
-export const CofhejsPermitModal = () => {
-  const { generatePermitModalOpen, generatePermitModalCallback, setGeneratePermitModalOpen } = useCofhejsModalStore();
-  const createPermit = useCofhejsCreatePermit();
-  const account = useCofhejsAccount();
+export const CofhePermitModal = () => {
+  const { generatePermitModalOpen, generatePermitModalCallback, setGeneratePermitModalOpen } = useCofheModalStore();
+  const createPermit = useCofheCreatePermit();
+  const account = useCofheAccount();
   const [expiration, setExpiration] = useState<ExpirationOption>("1 week");
   const [recipient, setRecipient] = useState<string>("");
   const [name, setName] = useState<string>("");
@@ -47,6 +47,8 @@ export const CofhejsPermitModal = () => {
   }, [setGeneratePermitModalOpen]);
 
   const handleGeneratePermit = useCallback(async () => {
+    if (!account) throw new Error("No connected account");
+
     const type = recipient ? "sharing" : "self";
 
     const permitName = name.length > 0 ? name.slice(0, 24) : undefined;

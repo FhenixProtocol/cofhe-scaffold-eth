@@ -1,15 +1,15 @@
 import { useRef } from "react";
-import { Permit } from "cofhejs/web";
+import { Permit, PermitUtils } from "@cofhe/sdk/permits";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { ShieldCheckIcon } from "@heroicons/react/24/solid";
 import {
-  useCofhejsActivePermit,
-  useCofhejsAllPermits,
-  useCofhejsModalStore,
-  useCofhejsRemovePermit,
-  useCofhejsSetActivePermit,
-  useCofhejsStatus,
-} from "~~/app/useCofhejs";
+  useCofheActivePermit,
+  useCofheAllPermits,
+  useCofheModalStore,
+  useCofheRemovePermit,
+  useCofheSetActivePermit,
+  useCofheStatus,
+} from "~~/app/useCofhe";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
 import scaffoldConfig from "~~/scaffold.config";
 
@@ -27,13 +27,13 @@ import scaffoldConfig from "~~/scaffold.config";
  * The portal is accessible through a shield icon button in the UI, which opens a dropdown
  * containing all permit management functionality and system status information.
  */
-export const CofhejsPortal = () => {
-  const { chainId, account, initialized } = useCofhejsStatus();
+export const CofhePortal = () => {
+  const { chainId, account, connected } = useCofheStatus();
   const dropdownRef = useRef<HTMLDetailsElement>(null);
-  const activePermit = useCofhejsActivePermit();
+  const activePermit = useCofheActivePermit();
 
-  const setGeneratePermitModalOpen = useCofhejsModalStore(state => state.setGeneratePermitModalOpen);
-  const removePermit = useCofhejsRemovePermit();
+  const setGeneratePermitModalOpen = useCofheModalStore(state => state.setGeneratePermitModalOpen);
+  const removePermit = useCofheRemovePermit();
 
   const closeDropdown = () => {
     dropdownRef.current?.removeAttribute("open");
@@ -58,15 +58,15 @@ export const CofhejsPortal = () => {
       <div className="dropdown-content z-2 p-4 mt-2 shadow-center shadow-accent bg-base-200 rounded-box gap-1 min-w-[275px]">
         <div className="flex flex-row justify-center items-center gap-2 px-2 py-1">
           <ShieldCheckIcon className="h-5 w-5 text-cofhe-primary" />
-          <span className="font-bold">Cofhejs Portal</span>
+          <span className="font-bold">CoFHE Portal</span>
         </div>
         <div className="flex flex-col gap-1 mt-2">
-          <div className="menu-title text-xs">Initialization Status</div>
+          <div className="menu-title text-xs">Connection Status</div>
           <InfoRow
             className="h-8"
-            label="Initialized"
-            value={initialized ? "Yes" : "No"}
-            valueClassName={initialized ? "text-success" : "text-error"}
+            label="Connected"
+            value={connected ? "Yes" : "No"}
+            valueClassName={connected ? "text-success" : "text-error"}
           />
           <InfoRow
             className="h-8"
@@ -81,7 +81,7 @@ export const CofhejsPortal = () => {
           {activePermit && <PermitItem key="active" permit={activePermit} isActive={true} onRemove={removePermit} />}
           <AllPermitsList />
           <div
-            className={`btn btn-sm btn-cofhe mt-2 w-full ${!initialized && "btn-disabled"}`}
+            className={`btn btn-sm btn-cofhe mt-2 w-full ${!connected && "btn-disabled"}`}
             onClick={handleCreatePermit}
           >
             Create Permit
@@ -120,9 +120,9 @@ const InfoRow = ({
  * Shows a placeholder message when no permits are available.
  */
 const AllPermitsList = () => {
-  const activePermit = useCofhejsActivePermit();
-  const allPermits = useCofhejsAllPermits();
-  const removePermit = useCofhejsRemovePermit();
+  const activePermit = useCofheActivePermit();
+  const allPermits = useCofheAllPermits();
+  const removePermit = useCofheRemovePermit();
 
   if (allPermits.length === 0) {
     return (
@@ -134,8 +134,9 @@ const AllPermitsList = () => {
 
   return (
     <div className="flex flex-col gap-1 mt-1">
-      {allPermits.map(({ data: permit, success }, index) => {
-        if (!success || !permit || permit.getHash() === activePermit?.getHash()) return null;
+      {allPermits.map((permit, index) => {
+        // skip it if it's the active permit as there's no point in neither "using" it (it's already used) nor removing (it's being used)
+        if (activePermit && PermitUtils.getHash(permit) === PermitUtils.getHash(activePermit)) return null;
         return <PermitItem key={index} permit={permit} isActive={false} onRemove={removePermit} />;
       })}
     </div>
@@ -163,8 +164,8 @@ const PermitItem = ({
   isActive: boolean;
   onRemove: (hash: string) => void;
 }) => {
-  const setActivePermit = useCofhejsSetActivePermit();
-  const hash = permit.getHash();
+  const setActivePermit = useCofheSetActivePermit();
+  const hash = PermitUtils.getHash(permit);
 
   return (
     <div className="flex flex-col bg-base-300/30 p-2 rounded-lg">
@@ -191,12 +192,12 @@ const PermitItem = ({
       />
       {!isActive && (
         <div className="flex justify-start gap-2 mt-2">
-          <div className="btn btn-xs btn-cofhe" onClick={() => setActivePermit(permit.getHash())}>
+          <div className="btn btn-xs btn-cofhe" onClick={() => setActivePermit(hash)}>
             Use
           </div>
           <div
             className="btn btn-ghost btn-xs text-error hover:text-error hover:bg-error/10"
-            onClick={() => onRemove(permit.getHash())}
+            onClick={() => onRemove(hash)}
             title="Remove permit"
           >
             Delete
