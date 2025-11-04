@@ -135,7 +135,7 @@ const AllPermitsList = () => {
   return (
     <div className="flex flex-col gap-1 mt-1">
       {allPermits.map((permit, index) => {
-        // skip it if it's the active permit as there's no point in nethier using it (it's already used) nor removing (it's being used)
+        // skip it if it's the active permit as there's no point in neither "using" it (it's already used) nor removing (it's being used)
         if (activePermit && PermitUtils.getHash(permit) === PermitUtils.getHash(activePermit)) return null;
         return <PermitItem key={index} permit={permit} isActive={false} onRemove={removePermit} />;
       })}
