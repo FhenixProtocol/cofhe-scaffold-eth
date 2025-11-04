@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
-import { arbSepolia, baseSepolia, hardhat, sepolia } from "@cofhe/sdk/chains";
+import { arbSepolia, hardhat, sepolia } from "@cofhe/sdk/chains";
 import {
   CreateSelfPermitOptions,
   CreateSharingPermitOptions,
