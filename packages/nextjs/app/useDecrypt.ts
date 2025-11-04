@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { cofhesdkClient, useCofheAccount, useCofheInitialized } from "./useCofhe";
+import { cofhesdkClient, useCofheAccount, useCofheConnected } from "./useCofhe";
 import { FheTypes, UnsealedItem } from "@cofhe/sdk";
 import { zeroAddress } from "viem";
 import {
@@ -134,7 +134,7 @@ export const useDecryptValue = <T extends FheTypes>(
   ctHash: bigint | null | undefined,
 ): { onDecrypt: () => Promise<void>; result: DecryptionResult<T> } => {
   const cofheAccount = useCofheAccount();
-  const cofheInitialized = useCofheInitialized();
+  const cofheConnected = useCofheConnected();
   const [result, setResult] = useState<DecryptionResult<T>>(initialDecryptionResult(fheType, ctHash));
 
   // Reset when ctHash changes
@@ -153,12 +153,12 @@ export const useDecryptValue = <T extends FheTypes>(
       });
       return;
     }
-    if (!cofheInitialized || cofheAccount == null) {
+    if (!cofheConnected || cofheAccount == null) {
       setResult({
         fheType,
         ctHash,
         value: null,
-        error: !cofheInitialized ? "Cofhe not initialized" : "No account connected",
+        error: !cofheConnected ? "Cofhe not connected" : "No account connected",
         state: "error",
       });
       return;
@@ -183,7 +183,7 @@ export const useDecryptValue = <T extends FheTypes>(
         state: "error",
       });
     }
-  }, [fheType, ctHash, cofheAccount, cofheInitialized]);
+  }, [fheType, ctHash, cofheAccount, cofheConnected]);
 
   return {
     onDecrypt,

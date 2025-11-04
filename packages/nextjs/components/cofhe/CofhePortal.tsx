@@ -28,7 +28,7 @@ import scaffoldConfig from "~~/scaffold.config";
  * containing all permit management functionality and system status information.
  */
 export const CofhePortal = () => {
-  const { chainId, account, initialized } = useCofheStatus();
+  const { chainId, account, connected } = useCofheStatus();
   const dropdownRef = useRef<HTMLDetailsElement>(null);
   const activePermit = useCofheActivePermit();
 
@@ -61,12 +61,12 @@ export const CofhePortal = () => {
           <span className="font-bold">CoFHE Portal</span>
         </div>
         <div className="flex flex-col gap-1 mt-2">
-          <div className="menu-title text-xs">Initialization Status</div>
+          <div className="menu-title text-xs">Connection Status</div>
           <InfoRow
             className="h-8"
-            label="Initialized"
-            value={initialized ? "Yes" : "No"}
-            valueClassName={initialized ? "text-success" : "text-error"}
+            label="Connected"
+            value={connected ? "Yes" : "No"}
+            valueClassName={connected ? "text-success" : "text-error"}
           />
           <InfoRow
             className="h-8"
@@ -81,7 +81,7 @@ export const CofhePortal = () => {
           {activePermit && <PermitItem key="active" permit={activePermit} isActive={true} onRemove={removePermit} />}
           <AllPermitsList />
           <div
-            className={`btn btn-sm btn-cofhe mt-2 w-full ${!initialized && "btn-disabled"}`}
+            className={`btn btn-sm btn-cofhe mt-2 w-full ${!connected && "btn-disabled"}`}
             onClick={handleCreatePermit}
           >
             Create Permit

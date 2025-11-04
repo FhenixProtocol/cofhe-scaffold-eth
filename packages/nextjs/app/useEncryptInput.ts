@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { cofhesdkClient, useCofheInitialized } from "./useCofhe";
+import { cofhesdkClient, useCofheConnected } from "./useCofhe";
 import {
   Encryptable,
   EncryptableAddress,
@@ -84,7 +84,7 @@ const fheTypeToEncryptable = <T extends FheTypes>(
  * @returns An object containing:
  *   - onEncryptInput: A function to encrypt input values
  *   - isEncryptingInput: A boolean indicating if encryption is in progress
- *   - inputEncryptionDisabled: A boolean indicating if encryption is disabled (when cofhe is not initialized)
+ *   - inputEncryptionDisabled: A boolean indicating if encryption is disabled (when cofhe is not connected)
  *
  * @example
  * ```typescript
@@ -99,11 +99,11 @@ const fheTypeToEncryptable = <T extends FheTypes>(
  */
 export const useEncryptInput = () => {
   const [isEncryptingInput, setIsEncryptingInput] = useState(false);
-  const initialized = useCofheInitialized();
+  const connected = useCofheConnected();
 
   const onEncryptInput = useCallback(
     async <T extends FheTypes, E extends EncryptableInput<T>>(fheType: T, value: E) => {
-      if (!initialized) return;
+      if (!connected) return;
 
       logBlockStart("useEncryptInput");
       logBlockMessage(`ENCRYPTING INPUT | ${plaintextToString(fheType, value)}`);
@@ -127,8 +127,8 @@ export const useEncryptInput = () => {
 
       return encryptedValue;
     },
-    [initialized],
+    [connected],
   );
 
-  return { onEncryptInput, isEncryptingInput, inputEncryptionDisabled: !initialized };
+  return { onEncryptInput, isEncryptingInput, inputEncryptionDisabled: !connected };
 };

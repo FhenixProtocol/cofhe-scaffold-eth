@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import { FheTypes } from "@cofhe/sdk";
 import { LockClosedIcon, LockOpenIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
-import { useCofheInitialized, useCofheIsActivePermitValid, useCofheModalStore } from "~~/app/useCofhe";
+import { useCofheConnected, useCofheIsActivePermitValid, useCofheModalStore } from "~~/app/useCofhe";
 import { useDecryptValue } from "~~/app/useDecrypt";
 
 interface EncryptedZoneProps {
@@ -52,7 +52,7 @@ interface EncryptedValueProps<T extends FheTypes> {
 }
 
 export const EncryptedValue = <T extends FheTypes>({ label, fheType, ctHash }: EncryptedValueProps<T>) => {
-  const cofheInitialized = useCofheInitialized();
+  const cofheConnected = useCofheConnected();
   const isPermitValid = useCofheIsActivePermitValid();
   const setGeneratePermitModalOpen = useCofheModalStore(state => state.setGeneratePermitModalOpen);
   const { onDecrypt, result } = useDecryptValue(fheType, ctHash);
@@ -74,10 +74,7 @@ export const EncryptedValue = <T extends FheTypes>({ label, fheType, ctHash }: E
       <span className="text-xs font-semibold">{label}</span>
       {result.state === "no-data" && <span className="text-xs font-semibold flex-1 italic">No data</span>}
       {result.state === "encrypted" && (
-        <span
-          className={`btn btn-md btn-cofhe flex-1 ${cofheInitialized ? "" : "btn-disabled"}`}
-          onClick={handleDecrypt}
-        >
+        <span className={`btn btn-md btn-cofhe flex-1 ${cofheConnected ? "" : "btn-disabled"}`} onClick={handleDecrypt}>
           <LockClosedIcon className="w-5 h-5" aria-hidden="true" />
           <span className="flex flex-1 items-center justify-center">
             <span>Encrypted</span>

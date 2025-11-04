@@ -107,7 +107,7 @@ export function useConnectCofheClient() {
 }
 
 /**
- * Hook to get the current account initialized in cofhe
+ * Hook to get the current account connected to cofhe
  * @returns The current account address or undefined
  */
 export const useCofheAccount = () => {
@@ -115,12 +115,12 @@ export const useCofheAccount = () => {
 };
 
 /**
- * Hook to check if cofhe is fully initialized (FHE keys, provider, and signer)
+ * Hook to check if cofhe is connected (provider, and signer)
  * This is used to determine if the user is ready to use the FHE library
  * FHE based interactions (encrypt / decrypt) should be disabled until this is true
- * @returns boolean indicating if FHE keys, provider, and signer are all initialized
+ * @returns boolean indicating if provider, and signer are all connected
  */
-export const useCofheInitialized = () => {
+export const useCofheConnected = () => {
   const { connected } = useCofheConnectionSnapshot();
   return connected;
 };
@@ -132,7 +132,7 @@ export const useCofheInitialized = () => {
  */
 export const useCofheStatus = () => {
   const { chainId, account, connected } = useCofheConnectionSnapshot();
-  return useMemo(() => ({ chainId, account, initialized: connected }), [chainId, account, connected]);
+  return useMemo(() => ({ chainId, account, connected }), [chainId, account, connected]);
 };
 
 // Permit Modal
@@ -161,9 +161,9 @@ export const useCofheModalStore = create<CofhePermitModalStore>(set => ({
  * Refreshes when chainId, account, or initialization status changes
  */
 export const useCofheActivePermitHash = () => {
-  const { chainId, account, initialized } = useCofheStatus();
+  const { chainId, account, connected } = useCofheStatus();
   const permitsSnapshot = useCofhePermitsSnapshot();
-  if (!initialized || !chainId || !account) return undefined;
+  if (!connected || !chainId || !account) return undefined;
   return permitsSnapshot.activePermitHash?.[chainId]?.[account];
 };
 
@@ -173,15 +173,15 @@ export const useCofheActivePermitHash = () => {
  * Refreshes when active permit hash changes
  */
 export const useCofheActivePermit = (): Permit | null => {
-  const { chainId, account, initialized } = useCofheStatus();
+  const { chainId, account, connected } = useCofheStatus();
   const activePermitHash = useCofheActivePermitHash();
   const permitsSnapshot = useCofhePermitsSnapshot();
   return useMemo(() => {
-    if (!initialized || !chainId || !account || !activePermitHash) return null;
+    if (!connected || !chainId || !account || !activePermitHash) return null;
     const serializedPermit = permitsSnapshot.permits?.[chainId]?.[account]?.[activePermitHash] ?? null;
     const permit = serializedPermit ? PermitUtils.deserialize(serializedPermit) : null;
     return permit;
-  }, [activePermitHash, chainId, account, initialized, permitsSnapshot]);
+  }, [activePermitHash, chainId, account, connected, permitsSnapshot]);
 };
 
 /**
@@ -203,14 +203,14 @@ export const useCofheIsActivePermitValid = () => {
  * Refreshes when chainId, account, or initialization status changes
  */
 export const useCofheAllPermitHashes = () => {
-  const { chainId, account, initialized } = useCofheStatus();
+  const { chainId, account, connected } = useCofheStatus();
   const permitsSnapshot = useCofhePermitsSnapshot();
   return useMemo(() => {
-    if (!initialized || !chainId || !account) return [];
+    if (!connected || !chainId || !account) return [];
     const permitsForAccount = permitsSnapshot.permits?.[chainId]?.[account];
     if (!permitsForAccount) return [];
     return Object.keys(permitsForAccount);
-  }, [chainId, account, initialized, permitsSnapshot]);
+  }, [chainId, account, connected, permitsSnapshot]);
 };
 
 /**
@@ -219,9 +219,9 @@ export const useCofheAllPermitHashes = () => {
  * Refreshes when permit hashes change
  */
 export const useCofheAllPermits = (): Permit[] => {
-  const { chainId, account, initialized } = useCofheStatus();
+  const { chainId, account, connected } = useCofheStatus();
   const permitsSnapshot = useCofhePermitsSnapshot();
-  if (!initialized || !chainId || !account) return [];
+  if (!connected || !chainId || !account) return [];
   return Object.values(permitsSnapshot.permits?.[chainId]?.[account] || {})
     .map(serializedPermit => (serializedPermit ? PermitUtils.deserialize(serializedPermit) : null))
     .filter((permit): permit is Permit => permit !== null);
@@ -233,10 +233,10 @@ export const useCofheAllPermits = (): Permit[] => {
  * Refreshes when chainId, account, or initialization status changes
  */
 export const useCofheCreatePermit = () => {
-  const { chainId, account, initialized } = useCofheStatus();
+  const { chainId, account, connected } = useCofheStatus();
   return useCallback(
     async (opts: CreateSelfPermitOptions | CreateSharingPermitOptions) => {
-      if (!initialized || !chainId || !account) return;
+      if (!connected || !chainId || !account) return;
 
       async function getPermitResult() {
         if (opts.type === "self") return cofhesdkClient.permits.createSelf(opts);
@@ -251,7 +251,7 @@ export const useCofheCreatePermit = () => {
       }
       return permitResult;
     },
-    [chainId, account, initialized],
+    [chainId, account, connected],
   );
 };
 
@@ -261,14 +261,14 @@ export const useCofheCreatePermit = () => {
  * Refreshes when chainId, account, or initialization status changes
  */
 export const useCofheRemovePermit = () => {
-  const { chainId, account, initialized } = useCofheStatus();
+  const { chainId, account, connected } = useCofheStatus();
   return useCallback(
     async (permitHash: string) => {
-      if (!initialized || !chainId || !account) return;
+      if (!connected || !chainId || !account) return;
       permitStore.removePermit(chainId, account, permitHash);
       notification.success("Permit removed");
     },
-    [chainId, account, initialized],
+    [chainId, account, connected],
   );
 };
 
@@ -278,14 +278,14 @@ export const useCofheRemovePermit = () => {
  * Refreshes when chainId, account, or initialization status changes
  */
 export const useCofheSetActivePermit = () => {
-  const { chainId, account, initialized } = useCofheStatus();
+  const { chainId, account, connected } = useCofheStatus();
   return useCallback(
     async (permitHash: string) => {
-      if (!initialized || !chainId || !account) return;
+      if (!connected || !chainId || !account) return;
       permitStore.setActivePermitHash(chainId, account, permitHash);
       notification.success("Active permit updated");
     },
-    [chainId, account, initialized],
+    [chainId, account, connected],
   );
 };
 

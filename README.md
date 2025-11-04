@@ -151,7 +151,7 @@ Key concepts in FHE contract development:
 
 ### Testing your FHE Contract
 
-The [`FHECounter.test.ts`](packages/hardhat/test/FHECounter.test.ts) file demonstrates testing FHE contracts using the mock environment. Before using `cofhesdkClient.encryptInput` to prepare input variables, or `cofhesdkClient.decryptHandle` to read encrypted data, cofhe must be initialized. In a hardhat environment there is an exposed utility function:
+The [`FHECounter.test.ts`](packages/hardhat/test/FHECounter.test.ts) file demonstrates testing FHE contracts using the mock environment. Before using `cofhesdkClient.encryptInput` to prepare input variables, or `cofhesdkClient.decryptHandle` to read encrypted data, cofhe must be initialized and connected. In a hardhat environment there is an exposed utility function:
 
 ```typescript
 const [bob] = await hre.ethers.getSigners()
@@ -183,7 +183,7 @@ To read the encrypted variable directly, we can use `cofhesdkClient.decryptHandl
 const count = await counter.count();
 
 // `decryptHandle` is used to unseal the encrypted value
-// the client must be initialized before `unseal` can be called
+// the client must be initialized and connected before `unseal` can be called
 const unsealedResult = await client.decryptHandle(count, FheTypes.Uint32).decrypt();
 ```
 
@@ -191,7 +191,7 @@ To encrypt a variable for use as an `InEuint*` we can use `cofhesdkClient.encryp
 
 ```typescript
 // `encryptInputs` is used to encrypt the value
-// the client must be initialized before `encryptInputs` can be called
+// the client must be initialized and connected before `encryptInputs` can be called
 const encryptResult = await client.encryptInputs([Encryptable.uint32(5n)]).encrypt();
 
 const [encryptedInput] = await hre.cofhesdk.expectResultSuccess(encryptResult);
@@ -283,7 +283,7 @@ The [`CofhePortal`](packages/nextjs/components/cofhe/CofhePortal.tsx) component 
 
 The portal displays:
 
-- **Initialization Status**: Shows whether CoFHE is initialized, the connected account, and current network
+- **Connection Status**: Shows whether CoFHE is connected, the connected account, and current network
 - **Active Permit**: Displays details about the currently active permit including name, ID, issuer, and expiration
 - **Permit Management**: Allows users to create new permits, switch between existing permits, and delete unused permits
 
@@ -388,12 +388,12 @@ The [`useCofhe.ts`](packages/nextjs/app/useCofhe.ts) file provides comprehensive
 // Refreshes when connected wallet or chain changes
 useInitializeCofhe()
 
-// Hook to check if cofhe is fully initialized (FHE keys, provider, and signer)
+// Hook to check if cofhe is connected (provider, and signer)
 // This is used to determine if the user is ready to use the FHE library
 // FHE based interactions (encrypt / decrypt) should be disabled until this is true
-useCofheInitialized()
+useCofheConnected()
 
-// Hook to get the current account initialized in cofhe
+// Hook to get the current account connected to cofhe
 useCofheAccount()
 ```
 

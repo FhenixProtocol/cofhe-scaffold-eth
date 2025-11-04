@@ -91,7 +91,7 @@ describe("Counter", function () {
       const count = await counter.count();
 
       // `decryptHandle` is used to unseal the encrypted value
-      // the client must be initialized before `unseal` can be called
+      // the client must be initialized and connected before `unseal` can be called
       // `decrypt` returns a `Promise<Result<T>>` type.
       const unsealedResult = await client.decryptHandle(count, FheTypes.Uint32).decrypt();
       // The `Result<T>` type looks like this:
@@ -127,7 +127,7 @@ describe("Counter", function () {
       const client = await hre.cofhesdk.createBatteriesIncludedCofhesdkClient(bob);
 
       // `encryptInputs` is used to encrypt the value
-      // the client must be initialized before `encryptInputs` can be called
+      // the client must be initialized and connected before `encryptInputs` can be called
       // `encrypt` returns a `Promise<Result<T>>` type.
 
       const encryptResult = await client.encryptInputs([Encryptable.uint32(5n)]).encrypt();
