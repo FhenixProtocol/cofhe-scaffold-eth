@@ -1,8 +1,7 @@
-import { useEffect } from "react";
 import { QueryObserverResult, RefetchOptions, useQueryClient } from "@tanstack/react-query";
 import type { ExtractAbiFunctionNames } from "abitype";
 import { ReadContractErrorType } from "viem";
-import { useBlockNumber, useReadContract } from "wagmi";
+import { useReadContract, useWatchBlockNumber } from "wagmi";
 import { useSelectedNetwork } from "~~/hooks/scaffold-eth";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
 import { AllowedChainIds } from "~~/utils/scaffold-eth";
@@ -41,8 +40,12 @@ export const useScaffoldReadContract = <
   const { query: queryOptions, watch, ...readContractConfig } = readConfig;
   // set watch to true by default
   const defaultWatch = watch ?? true;
-
-  const readContractHookRes = useReadContract({
+  const readContractHookRes: Omit<ReturnType<typeof useReadContract>, "data" | "refetch"> & {
+    data: AbiFunctionReturnType<ContractAbi, TFunctionName> | undefined;
+    refetch: (
+      options?: RefetchOptions | undefined,
+    ) => Promise<QueryObserverResult<AbiFunctionReturnType<ContractAbi, TFunctionName>, ReadContractErrorType>>;
+  } = useReadContract({
     chainId: selectedNetwork.id,
     functionName,
     address: deployedContract?.address,
@@ -53,28 +56,22 @@ export const useScaffoldReadContract = <
       enabled: !Array.isArray(args) || !args.some(arg => arg === undefined),
       ...queryOptions,
     },
-  }) as Omit<ReturnType<typeof useReadContract>, "data" | "refetch"> & {
-    data: AbiFunctionReturnType<ContractAbi, TFunctionName> | undefined;
-    refetch: (
-      options?: RefetchOptions | undefined,
-    ) => Promise<QueryObserverResult<AbiFunctionReturnType<ContractAbi, TFunctionName>, ReadContractErrorType>>;
-  };
-
-  const queryClient = useQueryClient();
-  const { data: blockNumber } = useBlockNumber({
-    watch: defaultWatch,
-    chainId: selectedNetwork.id,
-    query: {
-      enabled: defaultWatch,
-    },
   });
 
-  useEffect(() => {
-    if (defaultWatch) {
-      queryClient.invalidateQueries({ queryKey: readContractHookRes.queryKey });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [blockNumber]);
+  const queryClient = useQueryClient();
+
+  useWatchBlockNumber({
+    pollingInterval: 5_000,
+    chainId: selectedNetwork.id,
+    enabled: defaultWatch,
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onBlockNumber: (blockNumber: bigint) => {
+      if (defaultWatch) {
+        queryClient.invalidateQueries({ queryKey: readContractHookRes.queryKey });
+      }
+    },
+  });
 
   return readContractHookRes;
 };
