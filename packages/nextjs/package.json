@@ -5,6 +5,7 @@
   "scripts": {
     "build": "next build",
     "check-types": "tsc --noEmit --incremental",
+    "cofhe:sdk-smoke": "node -e \"(async () => { const web = await import('cofhe-sdk-next/web'); const core = await import('cofhe-sdk-next'); console.log('[cofhe-sdk-next/web] exports:', Object.keys(web).sort()); console.log('[cofhe-sdk-next] exports:', Object.keys(core).sort()); console.log('has createCofheConfig/createCofheClient:', 'createCofheConfig' in web && 'createCofheClient' in web); })().catch(e => { console.error(e); process.exit(1); });\"",
     "dev": "next dev",
     "format": "prettier --write . '!(node_modules|.next|contracts)/**/*'",
     "ipfs": "NEXT_PUBLIC_IPFS_BUILD=true yarn build && yarn bgipfs upload config init -u https://upload.bgipfs.com && CID=$(yarn bgipfs upload out | grep -o 'CID: [^ ]*' | cut -d' ' -f2) && [ ! -z \"$CID\" ] && echo '🚀 Upload complete! Your site is now available at: https://community.bgipfs.com/ipfs/'$CID || echo '❌ Upload failed'",
@@ -24,6 +25,7 @@
     "@uniswap/v2-sdk": "~4.6.1",
     "blo": "~1.2.0",
     "burner-connector": "0.0.14",
+    "cofhe-sdk-next": "npm:@cofhe/sdk@0.4.0",
     "daisyui": "5.0.9",
     "kubo-rpc-client": "~5.0.2",
     "next": "~15.2.3",
