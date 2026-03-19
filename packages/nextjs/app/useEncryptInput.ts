@@ -1,7 +1,6 @@
 import { useCallback, useState } from "react";
 import { getCofheClientNext, useCofheConnected } from "./useCofhe";
-import { FheTypes } from "@cofhe/sdk";
-import { Encryptable } from "cofhe-sdk-next";
+import { Encryptable, FheTypes } from "@cofhe/sdk";
 import {
   encryptedValueToString,
   logBlockMessage,

@@ -5,7 +5,6 @@
   "scripts": {
     "build": "next build",
     "check-types": "tsc --noEmit --incremental",
-    "cofhe:sdk-smoke": "node -e \"(async () => { const web = await import('cofhe-sdk-next/web'); const core = await import('cofhe-sdk-next'); console.log('[cofhe-sdk-next/web] exports:', Object.keys(web).sort()); console.log('[cofhe-sdk-next] exports:', Object.keys(core).sort()); console.log('has createCofheConfig/createCofheClient:', 'createCofheConfig' in web && 'createCofheClient' in web); })().catch(e => { console.error(e); process.exit(1); });\"",
     "dev": "next dev",
     "format": "prettier --write . '!(node_modules|.next|contracts)/**/*'",
     "ipfs": "NEXT_PUBLIC_IPFS_BUILD=true yarn build && yarn bgipfs upload config init -u https://upload.bgipfs.com && CID=$(yarn bgipfs upload out | grep -o 'CID: [^ ]*' | cut -d' ' -f2) && [ ! -z \"$CID\" ] && echo '🚀 Upload complete! Your site is now available at: https://community.bgipfs.com/ipfs/'$CID || echo '❌ Upload failed'",
@@ -17,7 +16,7 @@
     "vercel:yolo": "vercel --build-env YARN_ENABLE_IMMUTABLE_INSTALLS=false --build-env ENABLE_EXPERIMENTAL_COREPACK=1 --build-env NEXT_PUBLIC_IGNORE_BUILD_ERROR=true --build-env VERCEL_TELEMETRY_DISABLED=1"
   },
   "dependencies": {
-    "@cofhe/sdk": "0.0.0-beta-20251103142716",
+    "@cofhe/sdk": "0.4.0",
     "@heroicons/react": "~2.1.5",
     "@rainbow-me/rainbowkit": "2.2.5",
     "@tanstack/react-query": "~5.59.15",
@@ -25,7 +24,6 @@
     "@uniswap/v2-sdk": "~4.6.1",
     "blo": "~1.2.0",
     "burner-connector": "0.0.14",
-    "cofhe-sdk-next": "npm:@cofhe/sdk@0.4.0",
     "daisyui": "5.0.9",
     "kubo-rpc-client": "~5.0.2",
     "next": "~15.2.3",
