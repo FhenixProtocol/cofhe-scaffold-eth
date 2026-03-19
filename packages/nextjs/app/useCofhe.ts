@@ -10,6 +10,8 @@ import {
   permitStore,
 } from "@cofhe/sdk/permits";
 import { createCofhesdkClient, createCofhesdkConfig } from "@cofhe/sdk/web";
+import { arbSepolia as arbSepoliaNext, hardhat as hardhatNext, sepolia as sepoliaNext } from "cofhe-sdk-next/chains";
+import { createCofheClient, createCofheConfig } from "cofhe-sdk-next/web";
 import * as chains from "viem/chains";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { create } from "zustand";
@@ -25,6 +27,23 @@ const config = createCofhesdkConfig({
   },
 });
 export const cofhesdkClient = createCofhesdkClient(config);
+
+let _cofheClientNext: ReturnType<typeof createCofheClient> | null = null;
+
+export const getCofheClientNext = () => {
+  if (_cofheClientNext) return _cofheClientNext;
+  if (typeof window === "undefined" || typeof document === "undefined") {
+    throw new Error("cofhe-sdk-next client can only be created in the browser");
+  }
+  const configNext = createCofheConfig({
+    supportedChains: [hardhatNext, sepoliaNext, arbSepoliaNext],
+    mocks: {
+      decryptDelay: 1000,
+    },
+  });
+  _cofheClientNext = createCofheClient(configNext);
+  return _cofheClientNext;
+};
 
 // sync core store
 const subscribeToConnection = (onStoreChange: () => void) => {
@@ -90,6 +109,12 @@ export function useConnectCofheClient() {
         if (connectionResult.success) {
           logBlockMessageAndEnd(`[connectionResult] SUCCESS          | CoFHE environment initialization`);
           notification.success("Cofhe connected successfully");
+
+          try {
+            await getCofheClientNext().connect(publicClient, walletClient);
+          } catch (nextErr) {
+            console.error("cofhe-sdk-next connection error:", nextErr);
+          }
         } else {
           logBlockMessageAndEnd(
             `FAILED           | ${connectionResult.error.message ?? String(connectionResult.error)}`,
