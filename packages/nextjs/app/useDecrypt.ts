@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { cofhesdkClient, useCofheAccount, useCofheConnected } from "./useCofhe";
+import { getCofheClientNext, useCofheAccount, useCofheConnected } from "./useCofhe";
 import { FheTypes, UnsealedItem } from "@cofhe/sdk";
 import { zeroAddress } from "viem";
 import {
@@ -66,28 +66,29 @@ const _decryptValue = async <T extends FheTypes>(fheType: T, value: bigint): Pro
     } as DecryptionResult<T>;
   }
 
-  const result = await cofhesdkClient.decryptHandle(value, fheType).decrypt();
-  if (result.success) {
+  try {
+    const data = await getCofheClientNext().decryptForView(value, fheType).execute();
     logBlockMessageAndEnd(
-      `SUCCESS          | ${encryptedValueToString(fheType, value)} => ${plaintextToString(fheType, result.data)}`,
+      `SUCCESS          | ${encryptedValueToString(fheType, value)} => ${plaintextToString(fheType, data as unknown as UnsealedItem<T>)}`,
     );
     return {
       fheType,
       ctHash: value,
-      value: result.data,
+      value: data as unknown as UnsealedItem<T>,
       error: null,
       state: "success",
     } as DecryptionResult<T>;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logBlockMessageAndEnd(`FAILED           | ${message}`);
+    return {
+      fheType,
+      ctHash: value,
+      value: null,
+      error: message,
+      state: "error",
+    } as DecryptionResult<T>;
   }
-
-  logBlockMessageAndEnd(`FAILED           | ${result.error.message}`);
-  return {
-    fheType,
-    ctHash: value,
-    value: null,
-    error: result.error.message,
-    state: "error",
-  } as DecryptionResult<T>;
 };
 
 const initialDecryptionResult = <T extends FheTypes>(
