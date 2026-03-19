@@ -1,16 +1,7 @@
 import { useCallback, useState } from "react";
-import { cofhesdkClient, useCofheConnected } from "./useCofhe";
-import {
-  Encryptable,
-  EncryptableAddress,
-  EncryptableBool,
-  EncryptableUint8,
-  EncryptableUint16,
-  EncryptableUint32,
-  EncryptableUint64,
-  EncryptableUint128,
-  FheTypes,
-} from "@cofhe/sdk";
+import { getCofheClientNext, useCofheConnected } from "./useCofhe";
+import { FheTypes } from "@cofhe/sdk";
+import { Encryptable } from "cofhe-sdk-next";
 import {
   encryptedValueToString,
   logBlockMessage,
@@ -24,27 +15,26 @@ import { notification } from "~~/utils/scaffold-eth";
  * Type mapping from FHE types to their corresponding Encryptable types.
  * This type ensures type safety when working with different FHE data types.
  */
-type EncryptableFromFheTypes<T extends FheTypes> = T extends FheTypes.Bool
-  ? EncryptableBool
-  : T extends FheTypes.Uint8
-    ? EncryptableUint8
-    : T extends FheTypes.Uint16
-      ? EncryptableUint16
-      : T extends FheTypes.Uint32
-        ? EncryptableUint32
-        : T extends FheTypes.Uint64
-          ? EncryptableUint64
-          : T extends FheTypes.Uint128
-            ? EncryptableUint128
-            : T extends FheTypes.Uint256
-              ? EncryptableAddress
-              : never;
+type NextEncryptableItem =
+  | ReturnType<typeof Encryptable.bool>
+  | ReturnType<typeof Encryptable.uint8>
+  | ReturnType<typeof Encryptable.uint16>
+  | ReturnType<typeof Encryptable.uint32>
+  | ReturnType<typeof Encryptable.uint64>
+  | ReturnType<typeof Encryptable.uint128>
+  | ReturnType<typeof Encryptable.address>;
 
 /**
  * Type representing the input data type for a given FHE type.
  * This maps FHE types to their corresponding input data types (e.g., boolean for Bool, string/bigint for Uint types).
  */
-type EncryptableInput<T extends FheTypes> = EncryptableFromFheTypes<T>["data"];
+type EncryptableInput<T extends FheTypes> = T extends FheTypes.Bool
+  ? boolean
+  : T extends FheTypes.Uint8 | FheTypes.Uint16 | FheTypes.Uint32 | FheTypes.Uint64 | FheTypes.Uint128
+    ? string | bigint
+    : T extends FheTypes.Uint160
+      ? string | bigint
+      : never;
 
 /**
  * Converts a value to its corresponding Encryptable type based on the specified FHE type.
@@ -53,25 +43,22 @@ type EncryptableInput<T extends FheTypes> = EncryptableFromFheTypes<T>["data"];
  * @returns An Encryptable instance of the specified type
  * @throws Error if the FHE type is not supported
  */
-const fheTypeToEncryptable = <T extends FheTypes>(
-  fheType: T,
-  value: EncryptableInput<T>,
-): EncryptableFromFheTypes<T> => {
+const fheTypeToEncryptable = <T extends FheTypes>(fheType: T, value: EncryptableInput<T>): NextEncryptableItem => {
   switch (fheType) {
     case FheTypes.Bool:
-      return Encryptable.bool(value as boolean) as EncryptableFromFheTypes<T>;
+      return Encryptable.bool(value as boolean);
     case FheTypes.Uint8:
-      return Encryptable.uint8(value as string | bigint) as EncryptableFromFheTypes<T>;
+      return Encryptable.uint8(value as string | bigint);
     case FheTypes.Uint16:
-      return Encryptable.uint16(value as string | bigint) as EncryptableFromFheTypes<T>;
+      return Encryptable.uint16(value as string | bigint);
     case FheTypes.Uint32:
-      return Encryptable.uint32(value as string | bigint) as EncryptableFromFheTypes<T>;
+      return Encryptable.uint32(value as string | bigint);
     case FheTypes.Uint64:
-      return Encryptable.uint64(value as string | bigint) as EncryptableFromFheTypes<T>;
+      return Encryptable.uint64(value as string | bigint);
     case FheTypes.Uint128:
-      return Encryptable.uint128(value as string | bigint) as EncryptableFromFheTypes<T>;
+      return Encryptable.uint128(value as string | bigint);
     case FheTypes.Uint160:
-      return Encryptable.address(value as string | bigint) as EncryptableFromFheTypes<T>;
+      return Encryptable.address(value as string | bigint);
     default:
       throw new Error(`Unsupported FHE type: ${fheType}`);
   }
@@ -111,21 +98,21 @@ export const useEncryptInput = () => {
       const encryptable = fheTypeToEncryptable<T>(fheType, value);
 
       setIsEncryptingInput(true);
-      const encryptedResult = await cofhesdkClient.encryptInputs([encryptable]).encrypt();
-      setIsEncryptingInput(false);
-
-      if (!encryptedResult.success) {
-        logBlockMessageAndEnd(`FAILED           | error = ${encryptedResult.error}`);
-        notification.error(`Failed to encrypt input: ${encryptedResult.error}`);
+      try {
+        const encryptedValues = await getCofheClientNext().encryptInputs([encryptable]).execute();
+        const encryptedValue = encryptedValues[0];
+        logBlockMessageAndEnd(
+          `SUCCESS          | ${plaintextToString(fheType, value)} => ${encryptedValueToString(fheType, encryptedValue.ctHash)}`,
+        );
+        return encryptedValues[0];
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        logBlockMessageAndEnd(`FAILED           | error = ${message}`);
+        notification.error(`Failed to encrypt input: ${message}`);
         return;
+      } finally {
+        setIsEncryptingInput(false);
       }
-
-      const encryptedValue = encryptedResult.data[0];
-      logBlockMessageAndEnd(
-        `SUCCESS          | ${plaintextToString(fheType, value)} => ${encryptedValueToString(fheType, encryptedValue.ctHash)}`,
-      );
-
-      return encryptedValue;
     },
     [connected],
   );
