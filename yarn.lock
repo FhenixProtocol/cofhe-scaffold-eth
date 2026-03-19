@@ -202,35 +202,39 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cofhe/hardhat-plugin@npm:0.0.0-beta-20251103142716":
-  version: 0.0.0-beta-20251103142716
-  resolution: "@cofhe/hardhat-plugin@npm:0.0.0-beta-20251103142716"
+"@cofhe/hardhat-plugin@npm:0.4.0":
+  version: 0.4.0
+  resolution: "@cofhe/hardhat-plugin@npm:0.4.0"
   dependencies:
-    "@cofhe/mock-contracts": 0.0.0-beta-20251103142716
-    "@cofhe/sdk": 0.0.0-beta-20251103142716
-    "@fhenixprotocol/cofhe-contracts": 0.0.13
-    "@openzeppelin/contracts": ^5.0.0
-    "@openzeppelin/contracts-upgradeable": ^5.0.0
+    "@cofhe/mock-contracts": 0.4.0
+    "@cofhe/sdk": 0.4.0
     chai: ^4.2.0
     chalk: ^4.1.2
     fast-glob: ^3.3.2
-    viem: ^2.0.0
+    viem: ^2.38.6
   peerDependencies:
+    "@fhenixprotocol/cofhe-contracts": ">=0.1.0"
     "@nomicfoundation/hardhat-ethers": ^3.0.0
+    "@openzeppelin/contracts": ^5.0.0
     ethers: ^5.0.0 || ^6.0.0
     hardhat: ^2.0.0
-  checksum: da302a0a50b538826c86118d38120cb5932d9c58d22460386c89dd8b9cfab667e8a8aa17079bc3ec7547a03828959e07066e4d28a2588d4f4f9e958bfcaeeb54
+  peerDependenciesMeta:
+    "@fhenixprotocol/cofhe-contracts":
+      optional: false
+    "@openzeppelin/contracts":
+      optional: false
+  checksum: 679d47335b88c306ba3c03d632703a6f74c392c2e394d4df82885719cc03c91c24765579978b26b90b35de3e74ce7bd10bfe1be78aacb2545c88eba61ae4b1fb
   languageName: node
   linkType: hard
 
-"@cofhe/mock-contracts@npm:0.0.0-beta-20251103142716":
-  version: 0.0.0-beta-20251103142716
-  resolution: "@cofhe/mock-contracts@npm:0.0.0-beta-20251103142716"
+"@cofhe/mock-contracts@npm:0.4.0":
+  version: 0.4.0
+  resolution: "@cofhe/mock-contracts@npm:0.4.0"
   dependencies:
-    "@fhenixprotocol/cofhe-contracts": 0.0.13
+    "@fhenixprotocol/cofhe-contracts": 0.1.0
     "@openzeppelin/contracts": ^5.0.0
     "@openzeppelin/contracts-upgradeable": ^5.0.0
-  checksum: b2b1e09450010541ba1f6801e27d5268dfbfb52b91c2b33e6a69644ac723dce12228954ff003478d344250c63a442b256bac500857d46ad18d9e7b49f465e9de
+  checksum: cc4b2cc5716b419cacd4e58472ee677002085ea6317ac238a8f2dd49a0ccef249f8fdbfbadeb12cd29ca6d33ce20fdcce530f11b7992bf686472a89ba44b373d
   languageName: node
   linkType: hard
 
@@ -262,6 +266,37 @@ __metadata:
     hardhat:
       optional: true
   checksum: 8e503d9030dba0471c6f614fb257317a051b896ff3bdb783406f1953c0243fcf935cf84f48a090d4867d44cbd9cf07deace3d193f59391ee2bd9130aa1cc7b4c
+  languageName: node
+  linkType: hard
+
+"@cofhe/sdk@npm:0.4.0, cofhe-sdk-next@npm:@cofhe/sdk@0.4.0":
+  version: 0.4.0
+  resolution: "@cofhe/sdk@npm:0.4.0"
+  dependencies:
+    iframe-shared-storage: ^1.0.34
+    immer: ^10.1.1
+    node-tfhe: 0.11.1
+    tfhe: 0.11.1
+    tweetnacl: ^1.0.3
+    viem: ^2.38.6
+    zod: ^4.0.0
+    zustand: ^5.0.1
+  peerDependencies:
+    "@nomicfoundation/hardhat-ethers": ^3.0.0
+    "@wagmi/core": ^2.0.0
+    ethers: ^5.0.0 || ^6.0.0
+    hardhat: ^2.0.0
+    viem: ^2.38.6
+  peerDependenciesMeta:
+    "@nomicfoundation/hardhat-ethers":
+      optional: true
+    "@wagmi/core":
+      optional: true
+    ethers:
+      optional: true
+    hardhat:
+      optional: true
+  checksum: dd826e03af6d26d8f25ed0a91c3cc0dd3d5674fea152b9192c5ce83c820cee75cf06019b22c63c416d0c2aaaaf6f6c787efd26acbb85a6549dae8025134be76b
   languageName: node
   linkType: hard
 
@@ -1335,12 +1370,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fhenixprotocol/cofhe-contracts@npm:0.0.13":
-  version: 0.0.13
-  resolution: "@fhenixprotocol/cofhe-contracts@npm:0.0.13"
+"@fhenixprotocol/cofhe-contracts@npm:0.1.0":
+  version: 0.1.0
+  resolution: "@fhenixprotocol/cofhe-contracts@npm:0.1.0"
   dependencies:
     "@openzeppelin/contracts": ^5.0.0
-  checksum: 3ca016a09df5a55d60e13e236553bfc3650c78dce1c583d22d8da329891e24cf8f0b91877032fcc1f74e6c59379bac71aa9e749561dd247f3e519313a5422e15
+  checksum: 8de9ec1e67f1df8d89943d73a0c3c02ddffc26907c25a5ffa6c5fe8c916e2a010e3f775a326f5923e81ba40b54bff19f849f6cbdbef81628ac7bbed0cda0fb3b
   languageName: node
   linkType: hard
 
@@ -3557,11 +3592,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@se-2/hardhat@workspace:packages/hardhat"
   dependencies:
-    "@cofhe/hardhat-plugin": 0.0.0-beta-20251103142716
-    "@cofhe/sdk": 0.0.0-beta-20251103142716
+    "@cofhe/hardhat-plugin": 0.4.0
+    "@cofhe/sdk": 0.4.0
     "@ethersproject/abi": ~5.7.0
     "@ethersproject/providers": ~5.7.2
-    "@fhenixprotocol/cofhe-contracts": 0.0.13
+    "@fhenixprotocol/cofhe-contracts": 0.1.0
     "@inquirer/password": ^4.0.2
     "@nomicfoundation/hardhat-chai-matchers": ~2.0.7
     "@nomicfoundation/hardhat-ethers": ~3.0.8
@@ -7080,37 +7115,6 @@ __metadata:
   version: 10.1.1
   resolution: "code-block-writer@npm:10.1.1"
   checksum: e048037acbcbda19fca62a3a63e4a64226ea6b5dc0fad7632d34a88c1165b29a357e5e19f0497811e9911472e824ab85f68176f40e439da87e051908956eb47c
-  languageName: node
-  linkType: hard
-
-"cofhe-sdk-next@npm:@cofhe/sdk@0.4.0":
-  version: 0.4.0
-  resolution: "@cofhe/sdk@npm:0.4.0"
-  dependencies:
-    iframe-shared-storage: ^1.0.34
-    immer: ^10.1.1
-    node-tfhe: 0.11.1
-    tfhe: 0.11.1
-    tweetnacl: ^1.0.3
-    viem: ^2.38.6
-    zod: ^4.0.0
-    zustand: ^5.0.1
-  peerDependencies:
-    "@nomicfoundation/hardhat-ethers": ^3.0.0
-    "@wagmi/core": ^2.0.0
-    ethers: ^5.0.0 || ^6.0.0
-    hardhat: ^2.0.0
-    viem: ^2.38.6
-  peerDependenciesMeta:
-    "@nomicfoundation/hardhat-ethers":
-      optional: true
-    "@wagmi/core":
-      optional: true
-    ethers:
-      optional: true
-    hardhat:
-      optional: true
-  checksum: dd826e03af6d26d8f25ed0a91c3cc0dd3d5674fea152b9192c5ce83c820cee75cf06019b22c63c416d0c2aaaaf6f6c787efd26acbb85a6549dae8025134be76b
   languageName: node
   linkType: hard
 
