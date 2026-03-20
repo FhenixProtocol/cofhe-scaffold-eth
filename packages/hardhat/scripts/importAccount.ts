@@ -1,5 +1,4 @@
 import { ethers } from "ethers";
-import { parse, stringify } from "envfile";
 import * as fs from "fs";
 import password from "@inquirer/password";
 
@@ -33,6 +32,8 @@ const getWalletFromPrivateKey = async () => {
 const setNewEnvConfig = async (existingEnvConfig = {}) => {
   console.log("👛 Importing Wallet\n");
 
+  const { stringify } = await import("envfile");
+
   const wallet = await getWalletFromPrivateKey();
 
   const pass = await getValidatedPassword();
@@ -51,6 +52,8 @@ const setNewEnvConfig = async (existingEnvConfig = {}) => {
 };
 
 async function main() {
+  const { parse } = await import("envfile");
+
   if (!fs.existsSync(envFilePath)) {
     // No .env file yet.
     await setNewEnvConfig();

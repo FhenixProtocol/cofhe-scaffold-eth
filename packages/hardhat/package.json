@@ -31,8 +31,8 @@
     "qrcode": "~1.5.4"
   },
   "devDependencies": {
-    "@cofhe/hardhat-plugin": "0.4.0",
-    "@cofhe/sdk": "0.4.0",
+    "@cofhe/hardhat-plugin": "file:../../../cofhesdk/packages/hardhat-plugin",
+    "@cofhe/sdk": "file:../../../cofhesdk/packages/sdk",
     "@ethersproject/abi": "~5.7.0",
     "@ethersproject/providers": "~5.7.2",
     "@fhenixprotocol/cofhe-contracts": "0.1.0",

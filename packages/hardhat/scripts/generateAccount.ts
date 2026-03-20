@@ -1,5 +1,4 @@
 import { ethers } from "ethers";
-import { parse, stringify } from "envfile";
 import * as fs from "fs";
 import password from "@inquirer/password";
 
@@ -21,6 +20,8 @@ const setNewEnvConfig = async (existingEnvConfig = {}) => {
   console.log("👛 Generating new Wallet\n");
   const randomWallet = ethers.Wallet.createRandom();
 
+  const { stringify } = await import("envfile");
+
   const pass = await getValidatedPassword();
   const encryptedJson = await randomWallet.encrypt(pass);
 
@@ -37,6 +38,8 @@ const setNewEnvConfig = async (existingEnvConfig = {}) => {
 };
 
 async function main() {
+  const { parse } = await import("envfile");
+
   if (!fs.existsSync(envFilePath)) {
     // No .env file yet.
     await setNewEnvConfig();

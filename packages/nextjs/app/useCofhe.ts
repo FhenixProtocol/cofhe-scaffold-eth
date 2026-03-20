@@ -1,10 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
+import { useCofheContext } from "@cofhe/react";
 import { CONNECT_STORE_DEFAULTS } from "@cofhe/sdk";
-import { arbSepolia, hardhat, sepolia } from "@cofhe/sdk/chains";
 import { CreateSelfPermitOptions, CreateSharingPermitOptions, Permit, PermitUtils } from "@cofhe/sdk/permits";
-import { createCofheClient, createCofheConfig } from "@cofhe/sdk/web";
 import * as chains from "viem/chains";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { create } from "zustand";
@@ -12,53 +11,34 @@ import scaffoldConfig from "~~/scaffold.config";
 import { logBlockMessage, logBlockMessageAndEnd, logBlockStart } from "~~/utils/cofhe/logging";
 import { notification } from "~~/utils/scaffold-eth";
 
-let _cofheClient: ReturnType<typeof createCofheClient> | null = null;
+type CofheClientType = ReturnType<typeof useCofheContext>["client"];
 
-export const getCofheClientNext = () => {
-  if (_cofheClient) return _cofheClient;
-  if (typeof window === "undefined" || typeof document === "undefined") {
-    throw new Error("cofhe client can only be created in the browser");
-  }
-  const config = createCofheConfig({
-    // mirrors scaffoldConfig.targetNetworks
-    supportedChains: [hardhat, sepolia, arbSepolia],
-    mocks: {
-      decryptDelay: 1000,
-    },
-  });
-  _cofheClient = createCofheClient(config);
-  return _cofheClient;
+export const useCofheClient = (): CofheClientType => {
+  return useCofheContext().client;
 };
 
-// sync core store
-const subscribeToConnection = (onStoreChange: () => void) => {
-  if (typeof window === "undefined" || typeof document === "undefined") return () => {};
-  return getCofheClientNext().subscribe(() => onStoreChange());
-};
-const getConnectionSnapshot = () => {
-  if (typeof window === "undefined" || typeof document === "undefined") return CONNECT_STORE_DEFAULTS;
-  return getCofheClientNext().getSnapshot();
-};
-const getServerConnectionSnapshot = () => CONNECT_STORE_DEFAULTS;
+const useCofheConnectionSnapshot = () => {
+  const client = useCofheClient();
 
-const useCofheConnectionSnapshot = () =>
-  useSyncExternalStore(subscribeToConnection, getConnectionSnapshot, getServerConnectionSnapshot);
-// sync permits store
-type PermitsSnapshot = ReturnType<ReturnType<typeof getCofheClientNext>["permits"]["getSnapshot"]>;
-const subscribeToPermits = (onStoreChange: () => void) => {
-  if (typeof window === "undefined" || typeof document === "undefined") return () => {};
-  return getCofheClientNext().permits.subscribe(() => onStoreChange());
+  const subscribeToConnection = useCallback((onStoreChange: () => void) => client.subscribe(onStoreChange), [client]);
+  const getConnectionSnapshot = useCallback(() => client.getSnapshot(), [client]);
+
+  return useSyncExternalStore(subscribeToConnection, getConnectionSnapshot, () => CONNECT_STORE_DEFAULTS);
 };
 
-const getPermitsSnapshot = (): PermitsSnapshot => {
-  if (typeof window === "undefined" || typeof document === "undefined") {
-    return { permits: {}, activePermitHash: {} } as PermitsSnapshot;
-  }
-  return getCofheClientNext().permits.getSnapshot();
-};
+type PermitsSnapshot = ReturnType<CofheClientType["permits"]["getSnapshot"]>;
+const useCofhePermitsSnapshot = (): PermitsSnapshot => {
+  const client = useCofheClient();
 
-const useCofhePermitsSnapshot = (): PermitsSnapshot =>
-  useSyncExternalStore(subscribeToPermits, getPermitsSnapshot, getPermitsSnapshot);
+  const subscribeToPermits = useCallback(
+    (onStoreChange: () => void) => client.permits.subscribe(onStoreChange),
+    [client],
+  );
+  const getPermitsSnapshot = useCallback(() => client.permits.getSnapshot() as PermitsSnapshot, [client]);
+  const getServerPermitsSnapshot = useCallback(() => ({ permits: {}, activePermitHash: {} }) as PermitsSnapshot, []);
+
+  return useSyncExternalStore(subscribeToPermits, getPermitsSnapshot, getServerPermitsSnapshot);
+};
 
 /**
  * Hook to check if the currently connected chain is supported by the application
@@ -79,6 +59,7 @@ export const useIsConnectedChainSupported = () => {
  * Refreshes when connected wallet or chain changes
  */
 export function useConnectCofheClient() {
+  const client = useCofheClient();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
   const isChainSupported = useIsConnectedChainSupported();
@@ -97,7 +78,7 @@ export function useConnectCofheClient() {
       logBlockMessage("CONNECTING     | Setting up CoFHE");
 
       try {
-        await getCofheClientNext().connect(publicClient, walletClient);
+        await client.connect(publicClient, walletClient);
         logBlockMessageAndEnd("SUCCESS          | CoFHE environment initialization");
         notification.success("Cofhe connected successfully");
       } catch (err) {
@@ -107,7 +88,7 @@ export function useConnectCofheClient() {
     };
 
     connectCofhe();
-  }, [walletClient, publicClient, isChainSupported]);
+  }, [walletClient, publicClient, isChainSupported, client]);
 }
 
 /**
@@ -238,6 +219,7 @@ export const useCofheAllPermits = (): Permit[] => {
  */
 export const useCofheCreatePermit = () => {
   const { chainId, account, connected } = useCofheStatus();
+  const client = useCofheClient();
   return useCallback(
     async (opts: CreateSelfPermitOptions | CreateSharingPermitOptions) => {
       if (!connected || !chainId || !account) return;
@@ -245,8 +227,8 @@ export const useCofheCreatePermit = () => {
       try {
         const permit =
           opts.type === "self"
-            ? await getCofheClientNext().permits.createSelf(opts)
-            : await getCofheClientNext().permits.createSharing(opts as CreateSharingPermitOptions);
+            ? await client.permits.createSelf(opts)
+            : await client.permits.createSharing(opts as CreateSharingPermitOptions);
         notification.success("Permit created");
         return { success: true as const, data: permit };
       } catch (err) {
@@ -255,7 +237,7 @@ export const useCofheCreatePermit = () => {
         return { success: false as const, error: err };
       }
     },
-    [chainId, account, connected],
+    [chainId, account, connected, client],
   );
 };
 
@@ -266,13 +248,14 @@ export const useCofheCreatePermit = () => {
  */
 export const useCofheRemovePermit = () => {
   const { chainId, account, connected } = useCofheStatus();
+  const client = useCofheClient();
   return useCallback(
     async (permitHash: string) => {
       if (!connected || !chainId || !account) return;
-      getCofheClientNext().permits.removePermit(permitHash, chainId, account);
+      client.permits.removePermit(permitHash, chainId, account);
       notification.success("Permit removed");
     },
-    [chainId, account, connected],
+    [chainId, account, connected, client],
   );
 };
 
@@ -283,13 +266,14 @@ export const useCofheRemovePermit = () => {
  */
 export const useCofheSetActivePermit = () => {
   const { chainId, account, connected } = useCofheStatus();
+  const client = useCofheClient();
   return useCallback(
     async (permitHash: string) => {
       if (!connected || !chainId || !account) return;
-      getCofheClientNext().permits.selectActivePermit(permitHash, chainId, account);
+      client.permits.selectActivePermit(permitHash, chainId, account);
       notification.success("Active permit updated");
     },
-    [chainId, account, connected],
+    [chainId, account, connected, client],
   );
 };
 
