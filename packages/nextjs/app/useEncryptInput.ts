@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { getCofheClientNext, useCofheConnected } from "./useCofhe";
+import { useCofheClient, useCofheConnected } from "./useCofhe";
 import { Encryptable, FheTypes } from "@cofhe/sdk";
 import {
   encryptedValueToString,
@@ -84,6 +84,7 @@ const fheTypeToEncryptable = <T extends FheTypes>(fheType: T, value: Encryptable
  * ```
  */
 export const useEncryptInput = () => {
+  const client = useCofheClient();
   const [isEncryptingInput, setIsEncryptingInput] = useState(false);
   const connected = useCofheConnected();
 
@@ -98,7 +99,7 @@ export const useEncryptInput = () => {
 
       setIsEncryptingInput(true);
       try {
-        const encryptedValues = await getCofheClientNext().encryptInputs([encryptable]).execute();
+        const encryptedValues = await client.encryptInputs([encryptable]).execute();
         const encryptedValue = encryptedValues[0];
         logBlockMessageAndEnd(
           `SUCCESS          | ${plaintextToString(fheType, value)} => ${encryptedValueToString(fheType, encryptedValue.ctHash)}`,
@@ -113,7 +114,7 @@ export const useEncryptInput = () => {
         setIsEncryptingInput(false);
       }
     },
-    [connected],
+    [connected, client],
   );
 
   return { onEncryptInput, isEncryptingInput, inputEncryptionDisabled: !connected };

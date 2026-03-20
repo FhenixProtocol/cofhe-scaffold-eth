@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { getCofheClientNext, useCofheAccount, useCofheConnected } from "./useCofhe";
+import { useCofheAccount, useCofheClient, useCofheConnected } from "./useCofhe";
 import { FheTypes, UnsealedItem } from "@cofhe/sdk";
 import { zeroAddress } from "viem";
 import {
@@ -47,7 +47,13 @@ export type DecryptionResult<T extends FheTypes> =
       state: "error";
     };
 
-const _decryptValue = async <T extends FheTypes>(fheType: T, value: bigint): Promise<DecryptionResult<T>> => {
+type CofheClientType = ReturnType<typeof useCofheClient>;
+
+const _decryptValue = async <T extends FheTypes>(
+  client: CofheClientType,
+  fheType: T,
+  value: bigint,
+): Promise<DecryptionResult<T>> => {
   logBlockStart("useDecrypt - _decryptValue");
   logBlockMessage(`DECRYPTING VALUE | ${encryptedValueToString(fheType, value)}`);
 
@@ -67,7 +73,7 @@ const _decryptValue = async <T extends FheTypes>(fheType: T, value: bigint): Pro
   }
 
   try {
-    const data = await getCofheClientNext().decryptForView(value, fheType).execute();
+    const data = await client.decryptForView(value, fheType).execute();
     logBlockMessageAndEnd(
       `SUCCESS          | ${encryptedValueToString(fheType, value)} => ${plaintextToString(fheType, data as unknown as UnsealedItem<T>)}`,
     );
@@ -134,6 +140,7 @@ export const useDecryptValue = <T extends FheTypes>(
   fheType: T,
   ctHash: bigint | null | undefined,
 ): { onDecrypt: () => Promise<void>; result: DecryptionResult<T> } => {
+  const client = useCofheClient();
   const cofheAccount = useCofheAccount();
   const cofheConnected = useCofheConnected();
   const [result, setResult] = useState<DecryptionResult<T>>(initialDecryptionResult(fheType, ctHash));
@@ -173,7 +180,7 @@ export const useDecryptValue = <T extends FheTypes>(
       state: "pending",
     });
     try {
-      const result = await _decryptValue(fheType, ctHash);
+      const result = await _decryptValue(client, fheType, ctHash);
       setResult(result);
     } catch (error) {
       setResult({
@@ -184,7 +191,7 @@ export const useDecryptValue = <T extends FheTypes>(
         state: "error",
       });
     }
-  }, [fheType, ctHash, cofheAccount, cofheConnected]);
+  }, [fheType, ctHash, cofheAccount, cofheConnected, client]);
 
   return {
     onDecrypt,
