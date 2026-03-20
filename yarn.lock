@@ -379,6 +379,35 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cofhe/react@patch:@cofhe/react@npm%3A0.4.0#./.yarn/patches/@cofhe-react-npm-0.4.0-0f33254581.patch::locator=se-2%40workspace%3A.":
+  version: 0.4.0
+  resolution: "@cofhe/react@patch:@cofhe/react@npm%3A0.4.0#./.yarn/patches/@cofhe-react-npm-0.4.0-0f33254581.patch::version=0.4.0&hash=25557c&locator=se-2%40workspace%3A."
+  dependencies:
+    "@cofhe/sdk": 0.4.0
+    "@radix-ui/react-dropdown-menu": ^2.1.16
+    "@radix-ui/react-select": ^2.2.6
+    "@tanstack/query-async-storage-persister": ^5.90.22
+    "@tanstack/react-query": ^5.90.7
+    "@tanstack/react-query-persist-client": ^5.90.7
+    bignumber.js: ^9.3.1
+    clsx: ^2.0.0
+    motion: ^12.23.26
+    react-error-boundary: ^6.0.0
+    react-icons: ^5.5.0
+    recharts: ^3.7.0
+    tailwind-merge: ^2.0.0
+    zod: ^4.0.0
+    zustand: ^5.0.1
+  peerDependencies:
+    "@mui/icons-material": ^5.0.0
+    "@mui/material": ^5.0.0
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+    viem: ^2.38.6
+  checksum: 798aa2927fb7d4bd2e0c57e12d765a6bcd5d435fa6e5b50a1614009b5709fb01c4b63987926a2d2920f4c573a56bcdf136d7dfc2624b3ad98680510b3572152b
+  languageName: node
+  linkType: hard
+
 "@cofhe/sdk@npm:0.4.0":
   version: 0.4.0
   resolution: "@cofhe/sdk@npm:0.4.0"
@@ -407,6 +436,37 @@ __metadata:
     hardhat:
       optional: true
   checksum: dd826e03af6d26d8f25ed0a91c3cc0dd3d5674fea152b9192c5ce83c820cee75cf06019b22c63c416d0c2aaaaf6f6c787efd26acbb85a6549dae8025134be76b
+  languageName: node
+  linkType: hard
+
+"@cofhe/sdk@patch:@cofhe/sdk@npm%3A0.4.0#./.yarn/patches/@cofhe-sdk-npm-0.4.0-b1a6c67efa.patch::locator=se-2%40workspace%3A.":
+  version: 0.4.0
+  resolution: "@cofhe/sdk@patch:@cofhe/sdk@npm%3A0.4.0#./.yarn/patches/@cofhe-sdk-npm-0.4.0-b1a6c67efa.patch::version=0.4.0&hash=cdd954&locator=se-2%40workspace%3A."
+  dependencies:
+    iframe-shared-storage: ^1.0.34
+    immer: ^10.1.1
+    node-tfhe: 0.11.1
+    tfhe: 0.11.1
+    tweetnacl: ^1.0.3
+    viem: ^2.38.6
+    zod: ^4.0.0
+    zustand: ^5.0.1
+  peerDependencies:
+    "@nomicfoundation/hardhat-ethers": ^3.0.0
+    "@wagmi/core": ^2.0.0
+    ethers: ^5.0.0 || ^6.0.0
+    hardhat: ^2.0.0
+    viem: ^2.38.6
+  peerDependenciesMeta:
+    "@nomicfoundation/hardhat-ethers":
+      optional: true
+    "@wagmi/core":
+      optional: true
+    ethers:
+      optional: true
+    hardhat:
+      optional: true
+  checksum: ceb4f79bd6ea0eb1fc0af4428ffe39e7cae6d8d2c3ebe6809ed3f7b6ff1db3e764c3c68f3fd749a8862029ea25945ba47a1a6716116b0176031d308e01160d95
   languageName: node
   linkType: hard
 
