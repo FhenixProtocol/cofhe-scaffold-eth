@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef } from "react";
 import { Permit, PermitUtils } from "@cofhe/sdk/permits";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
