@@ -304,19 +304,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cofhe/abi@npm:0.4.0":
+"@cofhe/abi@file:../cofhesdk/packages/abi::locator=se-2%40workspace%3A.":
   version: 0.4.0
-  resolution: "@cofhe/abi@npm:0.4.0"
+  resolution: "@cofhe/abi@file:../cofhesdk/packages/abi#../cofhesdk/packages/abi::hash=c45627&locator=se-2%40workspace%3A."
   dependencies:
     "@cofhe/sdk": 0.4.0
     abitype: ^1.2.3
-  checksum: 65669afd32004de43d8ea659312dc7220e41fc853ad0573bf3a3c69f7f1303cc57ba0e8a15d65e97eedd2fb231c0c5a165d43ec922935d212f32eac41fa023f1
+  checksum: d2613f542f233c526b1e4ab4f1a2d946fe9dcae7752c3cfeb48a9cecb84f3c11918a273e41fe5ec7ca11a4477243c184f0a215565042f8a2ae71ab4c9412a4f9
   languageName: node
   linkType: hard
 
-"@cofhe/hardhat-plugin@npm:0.4.0":
+"@cofhe/hardhat-plugin@file:../cofhesdk/packages/hardhat-plugin::locator=se-2%40workspace%3A.":
   version: 0.4.0
-  resolution: "@cofhe/hardhat-plugin@npm:0.4.0"
+  resolution: "@cofhe/hardhat-plugin@file:../cofhesdk/packages/hardhat-plugin#../cofhesdk/packages/hardhat-plugin::hash=7b54f3&locator=se-2%40workspace%3A."
   dependencies:
     "@cofhe/mock-contracts": 0.4.0
     "@cofhe/sdk": 0.4.0
@@ -335,24 +335,24 @@ __metadata:
       optional: false
     "@openzeppelin/contracts":
       optional: false
-  checksum: 679d47335b88c306ba3c03d632703a6f74c392c2e394d4df82885719cc03c91c24765579978b26b90b35de3e74ce7bd10bfe1be78aacb2545c88eba61ae4b1fb
+  checksum: c7868d89836545ac2b80942edcd8db7d8fd94ca138888ac9f5f5f3526d54da02fca871f74c459ac3a368f9b530c58219d5ca639613d43df63ebdb54e58b6f839
   languageName: node
   linkType: hard
 
-"@cofhe/mock-contracts@npm:0.4.0":
+"@cofhe/mock-contracts@file:../cofhesdk/packages/mock-contracts::locator=se-2%40workspace%3A.":
   version: 0.4.0
-  resolution: "@cofhe/mock-contracts@npm:0.4.0"
+  resolution: "@cofhe/mock-contracts@file:../cofhesdk/packages/mock-contracts#../cofhesdk/packages/mock-contracts::hash=5162d5&locator=se-2%40workspace%3A."
   dependencies:
     "@fhenixprotocol/cofhe-contracts": 0.1.0
     "@openzeppelin/contracts": ^5.0.0
     "@openzeppelin/contracts-upgradeable": ^5.0.0
-  checksum: cc4b2cc5716b419cacd4e58472ee677002085ea6317ac238a8f2dd49a0ccef249f8fdbfbadeb12cd29ca6d33ce20fdcce530f11b7992bf686472a89ba44b373d
+  checksum: d39ee89a21b12e3f03fc9225e57c39e54e38a34664bd088a08ce000ba9c7025b15186d61f31a311cbc60d0756ec7e9753072fe98ff03e9947608010a42a425ed
   languageName: node
   linkType: hard
 
-"@cofhe/react@npm:0.4.0":
+"@cofhe/react@file:../cofhesdk/packages/react::locator=se-2%40workspace%3A.":
   version: 0.4.0
-  resolution: "@cofhe/react@npm:0.4.0"
+  resolution: "@cofhe/react@file:../cofhesdk/packages/react#../cofhesdk/packages/react::hash=a6a870&locator=se-2%40workspace%3A."
   dependencies:
     "@cofhe/sdk": 0.4.0
     "@radix-ui/react-dropdown-menu": ^2.1.16
@@ -375,42 +375,13 @@ __metadata:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     viem: ^2.38.6
-  checksum: fcbe91d01cca0cf698be5b00ff391012b7f76bfe09fb940c10a7016be90c9d736249d44ae724a4d89b08a9aebaafba6533953a495d9d8fa973d15ee85d9a0153
+  checksum: f7aa6130207b37cc0a7bc51ea80a8db5b5066505f7c16ae5d5cb4cef01f6456ea1ac96526033cdf5f5abb0b3b4b044ec4bc3572fe580037a3cb47a0cfa3fe1d8
   languageName: node
   linkType: hard
 
-"@cofhe/react@patch:@cofhe/react@npm%3A0.4.0#./.yarn/patches/@cofhe-react-npm-0.4.0-0f33254581.patch::locator=se-2%40workspace%3A.":
+"@cofhe/sdk@file:../cofhesdk/packages/sdk::locator=se-2%40workspace%3A.":
   version: 0.4.0
-  resolution: "@cofhe/react@patch:@cofhe/react@npm%3A0.4.0#./.yarn/patches/@cofhe-react-npm-0.4.0-0f33254581.patch::version=0.4.0&hash=25557c&locator=se-2%40workspace%3A."
-  dependencies:
-    "@cofhe/sdk": 0.4.0
-    "@radix-ui/react-dropdown-menu": ^2.1.16
-    "@radix-ui/react-select": ^2.2.6
-    "@tanstack/query-async-storage-persister": ^5.90.22
-    "@tanstack/react-query": ^5.90.7
-    "@tanstack/react-query-persist-client": ^5.90.7
-    bignumber.js: ^9.3.1
-    clsx: ^2.0.0
-    motion: ^12.23.26
-    react-error-boundary: ^6.0.0
-    react-icons: ^5.5.0
-    recharts: ^3.7.0
-    tailwind-merge: ^2.0.0
-    zod: ^4.0.0
-    zustand: ^5.0.1
-  peerDependencies:
-    "@mui/icons-material": ^5.0.0
-    "@mui/material": ^5.0.0
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-    viem: ^2.38.6
-  checksum: 798aa2927fb7d4bd2e0c57e12d765a6bcd5d435fa6e5b50a1614009b5709fb01c4b63987926a2d2920f4c573a56bcdf136d7dfc2624b3ad98680510b3572152b
-  languageName: node
-  linkType: hard
-
-"@cofhe/sdk@npm:0.4.0":
-  version: 0.4.0
-  resolution: "@cofhe/sdk@npm:0.4.0"
+  resolution: "@cofhe/sdk@file:../cofhesdk/packages/sdk#../cofhesdk/packages/sdk::hash=c507fe&locator=se-2%40workspace%3A."
   dependencies:
     iframe-shared-storage: ^1.0.34
     immer: ^10.1.1
@@ -435,38 +406,7 @@ __metadata:
       optional: true
     hardhat:
       optional: true
-  checksum: dd826e03af6d26d8f25ed0a91c3cc0dd3d5674fea152b9192c5ce83c820cee75cf06019b22c63c416d0c2aaaaf6f6c787efd26acbb85a6549dae8025134be76b
-  languageName: node
-  linkType: hard
-
-"@cofhe/sdk@patch:@cofhe/sdk@npm%3A0.4.0#./.yarn/patches/@cofhe-sdk-npm-0.4.0-b1a6c67efa.patch::locator=se-2%40workspace%3A.":
-  version: 0.4.0
-  resolution: "@cofhe/sdk@patch:@cofhe/sdk@npm%3A0.4.0#./.yarn/patches/@cofhe-sdk-npm-0.4.0-b1a6c67efa.patch::version=0.4.0&hash=cdd954&locator=se-2%40workspace%3A."
-  dependencies:
-    iframe-shared-storage: ^1.0.34
-    immer: ^10.1.1
-    node-tfhe: 0.11.1
-    tfhe: 0.11.1
-    tweetnacl: ^1.0.3
-    viem: ^2.38.6
-    zod: ^4.0.0
-    zustand: ^5.0.1
-  peerDependencies:
-    "@nomicfoundation/hardhat-ethers": ^3.0.0
-    "@wagmi/core": ^2.0.0
-    ethers: ^5.0.0 || ^6.0.0
-    hardhat: ^2.0.0
-    viem: ^2.38.6
-  peerDependenciesMeta:
-    "@nomicfoundation/hardhat-ethers":
-      optional: true
-    "@wagmi/core":
-      optional: true
-    ethers:
-      optional: true
-    hardhat:
-      optional: true
-  checksum: ceb4f79bd6ea0eb1fc0af4428ffe39e7cae6d8d2c3ebe6809ed3f7b6ff1db3e764c3c68f3fd749a8862029ea25945ba47a1a6716116b0176031d308e01160d95
+  checksum: 10d8b88e125125d0d8cefbba347130a4708a9aae9e10469cb3bb83be345bc7ec79bd1944e5d661c05dbaa03438c37c362c7157c976345527319f4d89e89adc87
   languageName: node
   linkType: hard
 
@@ -3720,9 +3660,9 @@ __metadata:
   linkType: hard
 
 "@openzeppelin/contracts@npm:^5.0.0":
-  version: 5.3.0
-  resolution: "@openzeppelin/contracts@npm:5.3.0"
-  checksum: 1d1629c42d170e070c112779c33b3b81c133995695271bc62a696160b598b56455a3c56d1f976a42ee3dd426c4ad984451b1752139f2b7897c9e1ba56c1947da
+  version: 5.6.1
+  resolution: "@openzeppelin/contracts@npm:5.6.1"
+  checksum: 4a1c1d3f7f59b821cc16661faf16d0d723c7e4d83cad2717c7c9f75c3006e724db28bd27c8a14bebe17c5d29838d12d8e9428675d2892b4e719105ecd0628d58
   languageName: node
   linkType: hard
 
@@ -4686,8 +4626,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@se-2/hardhat@workspace:packages/hardhat"
   dependencies:
-    "@cofhe/hardhat-plugin": 0.4.0
-    "@cofhe/sdk": 0.4.0
+    "@cofhe/hardhat-plugin": "file:../../../cofhesdk/packages/hardhat-plugin"
+    "@cofhe/sdk": "file:../../../cofhesdk/packages/sdk"
     "@ethersproject/abi": ~5.7.0
     "@ethersproject/providers": ~5.7.2
     "@fhenixprotocol/cofhe-contracts": 0.1.0
@@ -4735,9 +4675,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@se-2/nextjs@workspace:packages/nextjs"
   dependencies:
-    "@cofhe/abi": 0.4.0
-    "@cofhe/react": 0.4.0
-    "@cofhe/sdk": 0.4.0
+    "@cofhe/abi": "file:../../../cofhesdk/packages/abi"
+    "@cofhe/react": "file:../../../cofhesdk/packages/react"
+    "@cofhe/sdk": "file:../../../cofhesdk/packages/sdk"
     "@emotion/react": ^11
     "@emotion/styled": ^11
     "@heroicons/react": ~2.1.5
@@ -5212,13 +5152,13 @@ __metadata:
   linkType: hard
 
 "@tanstack/react-query@npm:^5.90.7":
-  version: 5.91.2
-  resolution: "@tanstack/react-query@npm:5.91.2"
+  version: 5.91.3
+  resolution: "@tanstack/react-query@npm:5.91.3"
   dependencies:
     "@tanstack/query-core": 5.91.2
   peerDependencies:
     react: ^18 || ^19
-  checksum: 83c9fb7aab9183bb3c9ba14d7104ca5bf621dabb30d4e5d7ee95afe6cdb25bb8f1586dbbfbe950c05a563b7a2083d19b02caed9a82bc3090fafe64483bd68e17
+  checksum: 42873cd05b3a787501b979fe545d1f8c49b0b854d1de71dad8a94326e427c1cbaab70f46e9105bd26d605f87338b901a9d20c70774fa0168c8ba967941b293c9
   languageName: node
   linkType: hard
 

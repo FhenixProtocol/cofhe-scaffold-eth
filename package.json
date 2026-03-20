@@ -59,7 +59,10 @@
     "node": ">=20.18.3"
   },
   "resolutions": {
-    "@cofhe/react@0.4.0": "patch:@cofhe/react@npm%3A0.4.0#./.yarn/patches/@cofhe-react-npm-0.4.0-0f33254581.patch",
-    "@cofhe/sdk@0.4.0": "patch:@cofhe/sdk@npm%3A0.4.0#./.yarn/patches/@cofhe-sdk-npm-0.4.0-b1a6c67efa.patch"
+    "@cofhe/sdk": "file:../cofhesdk/packages/sdk",
+    "@cofhe/abi": "file:../cofhesdk/packages/abi",
+    "@cofhe/react": "file:../cofhesdk/packages/react",
+    "@cofhe/hardhat-plugin": "file:../cofhesdk/packages/hardhat-plugin",
+    "@cofhe/mock-contracts": "file:../cofhesdk/packages/mock-contracts"
   }
 }

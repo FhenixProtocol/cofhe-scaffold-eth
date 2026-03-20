@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import assert from "node:assert/strict";
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import hre from "hardhat";
 import { Encryptable, FheTypes } from "@cofhe/sdk";
@@ -8,7 +9,7 @@ import { Encryptable, FheTypes } from "@cofhe/sdk";
  * @description Test suite for the FHECounter contract demonstrating FHE operations and testing utilities
  *
  * This test suite showcases the use of FHE testing tools and utilities:
- * - hre.cofhesdk: Internal FHE testing utilities
+ * - hre.cofhe: Internal FHE testing utilities
  * - cofhe client: FHE operations interface
  * - Mock environment testing for FHE operations
  */
@@ -36,38 +37,38 @@ describe("Counter", function () {
      */
     beforeEach(function () {
       // NOTE: Uncomment for global logging
-      // hre.cofhesdk.mocks.enableLogs();
+      // hre.cofhe.mocks.enableLogs();
     });
 
     afterEach(function () {
       // NOTE: Uncomment for global logging
-      // hre.cofhesdk.mocks.disableLogs()
+      // hre.cofhe.mocks.disableLogs()
     });
 
     /**
      * @dev Tests the basic increment functionality
      * Demonstrates:
-     * - Reading encrypted values using hre.cofhesdk.mocks.expectPlaintext
-     * - Logging FHE operations using hre.cofhesdk.mocks.withLogs
+     * - Reading encrypted values using hre.cofhe.mocks.expectPlaintext
+     * - Logging FHE operations using hre.cofhe.mocks.withLogs
      */
     it("Should increment the counter", async function () {
       const { counter, bob } = await loadFixture(deployCounterFixture);
       const count = await counter.count();
 
-      // `hre.cofhesdk.mocks.expectPlaintext` is used to verify that the encrypted value is 0
+      // `hre.cofhe.mocks.expectPlaintext` is used to verify that the encrypted value is 0
       // This uses the encrypted variable `count` and retrieves the plaintext value from the on-chain mock contracts
       // This kind of test can only be done in a mock environment where the plaintext value is known
-      await hre.cofhesdk.mocks.expectPlaintext(count, 0n);
+      await hre.cofhe.mocks.expectPlaintext(count, 0n);
 
-      // `hre.cofhesdk.mocks.withLogs` is used to log the FHE operations
+      // `hre.cofhe.mocks.withLogs` is used to log the FHE operations
       // This is useful for debugging and understanding the FHE operations
       // It will log the FHE operations to the console
-      await hre.cofhesdk.mocks.withLogs("counter.increment()", async () => {
+      await hre.cofhe.mocks.withLogs("counter.increment()", async () => {
         await counter.connect(bob).increment();
       });
 
       const count2 = await counter.count();
-      await hre.cofhesdk.mocks.expectPlaintext(count2, 1n);
+      await hre.cofhe.mocks.expectPlaintext(count2, 1n);
     });
 
     /**
@@ -78,40 +79,26 @@ describe("Counter", function () {
      * - Verifying unsealed values match expectations
      */
     it("cofhesdk decrypt (mocks)", async function () {
-      await hre.cofhesdk.mocks.enableLogs("cofhesdk decrypt (mocks)");
+      await hre.cofhe.mocks.enableLogs("cofhesdk decrypt (mocks)");
       const { counter, bob } = await loadFixture(deployCounterFixture);
 
-      // `hre.cofhesdk.createBatteriesIncludedCofhesdkClient` is used to initialize FHE with a Hardhat signer
+      // `hre.cofhe.createClientWithBatteries` is used to initialize FHE with a Hardhat signer
       // Initialization is required before any `encrypt` or `decrypt` operations can be performed
-      // `createBatteriesIncludedCofhesdkClient` is a helper function that initializes FHE with a Hardhat signer
-      // Returns a `Promise<CofhesdkClient>` type.
-
-      const client = await hre.cofhesdk.createBatteriesIncludedCofhesdkClient(bob);
+      const client = await hre.cofhe.createClientWithBatteries(bob);
 
       const count = await counter.count();
 
-      // `decryptHandle` is used to unseal the encrypted value
-      // the client must be initialized and connected before `unseal` can be called
-      // `decrypt` returns a `Promise<Result<T>>` type.
-      const unsealedResult = await client.decryptHandle(count, FheTypes.Uint32).decrypt();
-      // The `Result<T>` type looks like this:
-      // {
-      //   success: boolean,
-      //   data: T (Permit | undefined in the case of initializeWithHardhatSigner),
-      //   error: CofhesdkError | null,
-      // }
-
-      // `hre.cofhesdk.expectResultValue` is used to verify that the `Result.data` is the expected value
-      // If the `Result.data` is not the expected value, the test will fail
-      await hre.cofhesdk.expectResultValue(unsealedResult, 0n);
+      // Decryption is performed via `decryptForView(...).withPermit().execute()` which returns the plaintext value.
+      const unsealed = await client.decryptForView(count, FheTypes.Uint32).withPermit().execute();
+      assert.equal(unsealed, 0n);
 
       await counter.connect(bob).increment();
 
       const count2 = await counter.count();
-      const unsealedResult2 = await client.decryptHandle(count2, FheTypes.Uint32).decrypt();
-      await hre.cofhesdk.expectResultValue(unsealedResult2, 1n);
+      const unsealed2 = await client.decryptForView(count2, FheTypes.Uint32).withPermit().execute();
+      assert.equal(unsealed2, 1n);
 
-      await hre.cofhesdk.mocks.disableLogs();
+      await hre.cofhe.mocks.disableLogs();
     });
 
     /**
@@ -124,31 +111,19 @@ describe("Counter", function () {
     it("cofhesdk encrypt (mocks)", async function () {
       const { counter, bob } = await loadFixture(deployCounterFixture);
 
-      const client = await hre.cofhesdk.createBatteriesIncludedCofhesdkClient(bob);
+      const client = await hre.cofhe.createClientWithBatteries(bob);
 
-      // `encryptInputs` is used to encrypt the value
-      // the client must be initialized and connected before `encryptInputs` can be called
-      // `encrypt` returns a `Promise<Result<T>>` type.
-
-      const encryptResult = await client.encryptInputs([Encryptable.uint32(5n)]).encrypt();
-      // The `Result<T>` type looks like this:
-      // {
-      //   success: boolean,
-      //   data: T (Permit | undefined in the case of initializeWithHardhatSigner),
-      //   error: CofhesdkError | null,
-      // }
-
-      const [encryptedInput] = await hre.cofhesdk.expectResultSuccess(encryptResult);
-      await hre.cofhesdk.mocks.expectPlaintext(encryptedInput.ctHash, 5n);
+      // `encryptInputs(...).execute()` returns the encrypted inputs.
+      const [encryptedInput] = await client.encryptInputs([Encryptable.uint32(5n)]).execute();
+      await hre.cofhe.mocks.expectPlaintext(encryptedInput.ctHash, 5n);
 
       await counter.connect(bob).set(encryptedInput);
 
       const count = await counter.count();
-      await hre.cofhesdk.mocks.expectPlaintext(count, 5n);
+      await hre.cofhe.mocks.expectPlaintext(count, 5n);
 
-      const unsealedResult = await client.decryptHandle(count, FheTypes.Uint32).decrypt();
-
-      await hre.cofhesdk.expectResultValue(unsealedResult, 5n);
+      const unsealed = await client.decryptForView(count, FheTypes.Uint32).withPermit().execute();
+      assert.equal(unsealed, 5n);
     });
   });
 });
